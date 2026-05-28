@@ -1,0 +1,318 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="x-apple-disable-message-reformatting" />
+  <title>Tu link de referido Selvadentro</title>
+
+  <!--
+    SELVADENTRO — Affiliate Welcome Email
+    ─────────────────────────────────────
+    Paste this entire HTML into GHL:
+      Marketing → Emails → New Email → Code (or Import HTML)
+    Then attach as the "Send Email" action in the Referrer Signup workflow.
+
+    Merge tags used (must exist as contact fields in GHL):
+      {{contact.first_name}}      — standard
+      {{contact.referral_link}}   — custom field (text or URL)
+      {{contact.affiliate_code}}  — custom field (text)
+
+    Tested for: Gmail (web + iOS + Android), Apple Mail, Outlook desktop + web,
+                Yahoo, ProtonMail. Web fonts gracefully fall back to system serifs.
+  -->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cardo:wght@400;700&family=Lexend:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style type="text/css">
+    /* Reset for stubborn clients */
+    body, table, td, p, a, li, blockquote {
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
+    a { text-decoration: none; }
+
+    /* Mobile tweaks */
+    @media only screen and (max-width: 600px) {
+      .container { width: 100% !important; max-width: 100% !important; }
+      .px-mobile { padding-left: 24px !important; padding-right: 24px !important; }
+      .py-mobile { padding-top: 32px !important; padding-bottom: 24px !important; }
+      .hero-h1 { font-size: 26px !important; line-height: 1.18 !important; }
+      .section-h2 { font-size: 19px !important; }
+      .link-text { font-size: 13px !important; }
+    }
+  </style>
+</head>
+<body style="margin:0; padding:0; background-color:#ECE5D8; font-family:'Lexend', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; color:#2D332B; -webkit-font-smoothing:antialiased;">
+
+  <!-- Inbox preview text (hidden but appears in client preview pane) -->
+  <div style="display:none; font-size:1px; color:#ECE5D8; line-height:1px; max-height:0; max-width:0; opacity:0; overflow:hidden; mso-hide:all;">
+    Tu link personalizado del Programa de Referidos Selvadentro está listo. Compártelo y comienza a ganar por cada amigo que invierta.
+  </div>
+
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color:#ECE5D8;">
+    <tr>
+      <td align="center" style="padding:32px 16px;">
+
+        <!-- ─────────── Container ─────────── -->
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" class="container" style="max-width:600px; width:100%;">
+
+          <!-- HEADER -->
+          <tr>
+            <td align="center" style="background-color:#465241; padding:36px 24px; border-radius:16px 16px 0 0;">
+              <img src="https://lotes.selvadentrotulum.com/logo-selvandentro_tulum.webp"
+                   alt="Selvadentro Tulum"
+                   width="180"
+                   style="display:block; width:180px; max-width:180px; height:auto; border:0; outline:none;" />
+            </td>
+          </tr>
+
+          <!-- HERO -->
+          <tr>
+            <td class="px-mobile py-mobile" style="background-color:#FFFFFF; padding:48px 40px 28px 40px;">
+              <p style="margin:0 0 14px 0; font-family:'Lexend', Arial, sans-serif; font-size:11px; line-height:1.4; letter-spacing:0.22em; text-transform:uppercase; color:#CF8543; font-weight:600;">
+                Programa de Referidos
+              </p>
+              <h1 class="hero-h1" style="margin:0 0 18px 0; font-family:'Cardo', Georgia, 'Times New Roman', serif; font-size:32px; line-height:1.15; font-weight:700; color:#465241; letter-spacing:-0.01em;">
+                Tu link está listo, {{contact.first_name}}.
+              </h1>
+              <p style="margin:0; font-family:'Lexend', Arial, sans-serif; font-size:16px; line-height:1.65; color:#5C5650;">
+                Bienvenido al Programa de Referidos Selvadentro. Compártelo con tu círculo y empieza a ganar por cada amigo que invierta en el proyecto.
+              </p>
+            </td>
+          </tr>
+
+          <!-- LINK BLOCK -->
+          <tr>
+            <td class="px-mobile" style="background-color:#FFFFFF; padding:0 40px 8px 40px;">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color:#F8F5EF; border:1px solid rgba(70,82,65,0.10); border-radius:12px;">
+                <tr>
+                  <td style="padding:18px 20px 6px 20px;">
+                    <p style="margin:0; font-family:'Lexend', Arial, sans-serif; font-size:10.5px; letter-spacing:0.20em; text-transform:uppercase; color:#65713F; font-weight:600;">
+                      Tu link personalizado
+                    </p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:0 20px 18px 20px;">
+                    <a href="{{contact.referral_link}}" class="link-text"
+                       style="display:block; font-family:'Lexend', Consolas, monospace; font-size:14px; line-height:1.5; word-break:break-all; color:#465241; text-decoration:none; font-weight:500;">
+                      {{contact.referral_link}}
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- WHATSAPP CTA BUTTON -->
+          <tr>
+            <td class="px-mobile" style="background-color:#FFFFFF; padding:24px 40px 8px 40px;">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td align="center">
+                    <!--[if mso]>
+                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word"
+                                 href="https://wa.me/?text=Hola%2C%20te%20comparto%20el%20proyecto%20Selvadentro%20Tulum.%20Creo%20que%20te%20va%20a%20interesar%3A%20{{contact.referral_link}}"
+                                 style="height:48px;v-text-anchor:middle;width:280px;" arcsize="50%" stroke="f" fillcolor="#65713F">
+                      <w:anchorlock/>
+                      <center style="color:#FFFFFF;font-family:Arial,sans-serif;font-size:15px;font-weight:600;">Compartir por WhatsApp</center>
+                    </v:roundrect>
+                    <![endif]-->
+                    <!--[if !mso]><!-->
+                    <a href="https://wa.me/?text=Hola%2C%20te%20comparto%20el%20proyecto%20Selvadentro%20Tulum.%20Creo%20que%20te%20va%20a%20interesar%3A%20{{contact.referral_link}}"
+                       style="display:inline-block; background-color:#65713F; color:#FFFFFF; font-family:'Lexend', Arial, sans-serif; font-size:15px; font-weight:600; padding:14px 36px; border-radius:999px; text-decoration:none; letter-spacing:0.01em;">
+                      Compartir por WhatsApp&nbsp;&nbsp;→
+                    </a>
+                    <!--<![endif]-->
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:14px 0 0 0; font-family:'Lexend', Arial, sans-serif; font-size:12px; line-height:1.5; color:#8C8478; text-align:center;">
+                O copia el link de arriba y pégalo donde quieras.
+              </p>
+            </td>
+          </tr>
+
+          <!-- DIVIDER -->
+          <tr>
+            <td class="px-mobile" style="background-color:#FFFFFF; padding:32px 40px 0 40px;">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td style="border-top:1px solid rgba(70,82,65,0.12); font-size:0; line-height:0;">&nbsp;</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- HOW IT WORKS -->
+          <tr>
+            <td class="px-mobile" style="background-color:#FFFFFF; padding:32px 40px 8px 40px;">
+              <h2 class="section-h2" style="margin:0 0 24px 0; font-family:'Cardo', Georgia, serif; font-size:22px; line-height:1.2; font-weight:700; color:#465241; letter-spacing:-0.01em;">
+                Cómo funciona
+              </h2>
+
+              <!-- Step 1 -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom:18px;">
+                <tr>
+                  <td width="40" valign="top" style="width:40px;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="34" style="background-color:rgba(207,133,67,0.14); border-radius:50%;">
+                      <tr>
+                        <td align="center" valign="middle" height="34" style="height:34px; font-family:'Cardo', Georgia, serif; font-size:15px; font-weight:700; color:#CF8543;">
+                          1
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                  <td valign="top" style="padding-left:14px;">
+                    <p style="margin:2px 0 4px 0; font-family:'Lexend', Arial, sans-serif; font-size:14px; font-weight:600; color:#465241;">
+                      Comparte tu link
+                    </p>
+                    <p style="margin:0; font-family:'Lexend', Arial, sans-serif; font-size:14px; line-height:1.55; color:#5C5650;">
+                      WhatsApp, email, redes sociales. A quien creas que le va a interesar el proyecto.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Step 2 -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom:18px;">
+                <tr>
+                  <td width="40" valign="top" style="width:40px;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="34" style="background-color:rgba(207,133,67,0.14); border-radius:50%;">
+                      <tr>
+                        <td align="center" valign="middle" height="34" style="height:34px; font-family:'Cardo', Georgia, serif; font-size:15px; font-weight:700; color:#CF8543;">
+                          2
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                  <td valign="top" style="padding-left:14px;">
+                    <p style="margin:2px 0 4px 0; font-family:'Lexend', Arial, sans-serif; font-size:14px; font-weight:600; color:#465241;">
+                      Cada clic queda registrado
+                    </p>
+                    <p style="margin:0; font-family:'Lexend', Arial, sans-serif; font-size:14px; line-height:1.55; color:#5C5650;">
+                      Atribuimos cada visita y cada formulario completado a tu nombre, automáticamente.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Step 3 -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom:8px;">
+                <tr>
+                  <td width="40" valign="top" style="width:40px;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="34" style="background-color:rgba(207,133,67,0.14); border-radius:50%;">
+                      <tr>
+                        <td align="center" valign="middle" height="34" style="height:34px; font-family:'Cardo', Georgia, serif; font-size:15px; font-weight:700; color:#CF8543;">
+                          3
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                  <td valign="top" style="padding-left:14px;">
+                    <p style="margin:2px 0 4px 0; font-family:'Lexend', Arial, sans-serif; font-size:14px; font-weight:600; color:#465241;">
+                      Ganas al escriturar
+                    </p>
+                    <p style="margin:0; font-family:'Lexend', Arial, sans-serif; font-size:14px; line-height:1.55; color:#5C5650;">
+                      Cuando uno de tus referidos firma su escritura, recibes tu comisión. Sin letra chica.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- WHY SELVADENTRO -->
+          <tr>
+            <td class="px-mobile" style="background-color:#FFFFFF; padding:32px 40px 0 40px;">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td style="border-top:1px solid rgba(70,82,65,0.12); padding-top:32px;">
+                    <h2 class="section-h2" style="margin:0 0 18px 0; font-family:'Cardo', Georgia, serif; font-size:22px; line-height:1.2; font-weight:700; color:#465241; letter-spacing:-0.01em;">
+                      Por qué Selvadentro
+                    </h2>
+
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td style="padding:6px 0;">
+                          <p style="margin:0; font-family:'Lexend', Arial, sans-serif; font-size:14px; line-height:1.6; color:#5C5650;">
+                            <span style="color:#CF8543; font-weight:700;">9 cenotes naturales</span>
+                            &nbsp;·&nbsp; solo 35% edificable
+                          </p>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding:6px 0;">
+                          <p style="margin:0; font-family:'Lexend', Arial, sans-serif; font-size:14px; line-height:1.6; color:#5C5650;">
+                            <span style="color:#CF8543; font-weight:700;">+134% apreciación</span>
+                            &nbsp;confirmada entre Fase 1 y Fase 4
+                          </p>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding:6px 0;">
+                          <p style="margin:0; font-family:'Lexend', Arial, sans-serif; font-size:14px; line-height:1.6; color:#5C5650;">
+                            <span style="color:#CF8543; font-weight:700;">20+ años</span>
+                            &nbsp;·&nbsp; 12 proyectos entregados &nbsp;·&nbsp; 100% escrituras
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Bottom spacer of the white card -->
+          <tr>
+            <td style="background-color:#FFFFFF; padding:40px 40px 0 40px; font-size:0; line-height:0;">&nbsp;</td>
+          </tr>
+
+          <!-- CONTACT BAR -->
+          <tr>
+            <td class="px-mobile" style="background-color:#F8F5EF; padding:24px 40px; border-top:1px solid rgba(70,82,65,0.08);">
+              <p style="margin:0 0 6px 0; font-family:'Lexend', Arial, sans-serif; font-size:13px; color:#465241; font-weight:600;">
+                ¿Dudas?
+              </p>
+              <p style="margin:0; font-family:'Lexend', Arial, sans-serif; font-size:13px; line-height:1.65; color:#5C5650;">
+                Responde este correo, escríbenos a
+                <a href="mailto:d.comercial@selvadentrotulum.com" style="color:#65713F; text-decoration:underline; font-weight:500;">d.comercial@selvadentrotulum.com</a>
+                o llámanos al
+                <a href="tel:+529841374927" style="color:#65713F; text-decoration:underline; font-weight:500;">+52 984 137 4927</a>.
+              </p>
+            </td>
+          </tr>
+
+          <!-- FOOTER -->
+          <tr>
+            <td align="center" style="background-color:#1F2A22; padding:28px 24px; border-radius:0 0 16px 16px;">
+              <p style="margin:0 0 6px 0; font-family:'Lexend', Arial, sans-serif; font-size:12px; line-height:1.5; color:rgba(255,255,255,0.55);">
+                © 2026 Selvadentro Tulum · Programa de Referidos
+              </p>
+              <p style="margin:0; font-family:'Lexend', Arial, sans-serif; font-size:11px; line-height:1.5; color:rgba(255,255,255,0.35); letter-spacing:0.02em;">
+                Tu código: <span style="color:rgba(207,133,67,0.85); font-weight:600;">{{contact.affiliate_code}}</span>
+              </p>
+            </td>
+          </tr>
+
+          <!-- Bottom whitespace (so the email doesn't hug the inbox edge) -->
+          <tr>
+            <td style="padding:0 0 16px 0; font-size:0; line-height:0;">&nbsp;</td>
+          </tr>
+
+        </table>
+        <!-- ─────────── /Container ─────────── -->
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>

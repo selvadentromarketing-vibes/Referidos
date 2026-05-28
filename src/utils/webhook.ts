@@ -19,9 +19,8 @@ import { TrackingParams } from './tracking';
 const REFERRER_SIGNUP_WEBHOOK_URL =
   'https://services.leadconnectorhq.com/hooks/crN2IhAuOBAl7D8324yI/webhook-trigger/874d9a89-3828-4216-ba8a-b4a3ccadc7b1';
 
-// ⚠️ Still placeholder — awaiting the Referral Lead webhook URL from client.
 const REFERRAL_LEAD_WEBHOOK_URL =
-  'https://services.leadconnectorhq.com/hooks/crN2IhAuOBAl7D8324yI/webhook-trigger/REPLACE-ME-REFERRAL-LEAD';
+  'https://services.leadconnectorhq.com/hooks/crN2IhAuOBAl7D8324yI/webhook-trigger/736533f0-b6a5-4f5e-971e-487bf26ece26';
 
 const REFERRAL_LINK_BASE = 'https://referidos.selvadentrotulum.com/invitacion';
 
