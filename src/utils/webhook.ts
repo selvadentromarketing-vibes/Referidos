@@ -196,11 +196,10 @@ export const submitReferralLead = async (
       phone: data.phone,
       language: 'Spanish',
       form_type: 'referral-lead',
-      // Affiliate attribution
-      affiliate_id: affiliate_code,
-      ref: tracking.ref,
-      referrer: tracking.referrer,
-      aff: tracking.aff,
+      // Affiliate attribution — single clean field name.
+      // Whichever URL param matched (ref / aff / affiliate_id / referrer)
+      // gets normalized to this single key for GHL mapping.
+      referred_by_code: affiliate_code,
       source_label: 'referidos-lead',
       tags: ['referidos', 'referral-lead'],
       'contact.source': 'Referidos - Lead',
