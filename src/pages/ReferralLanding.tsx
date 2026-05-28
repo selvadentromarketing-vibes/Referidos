@@ -3,6 +3,7 @@ import { CheckCircle2, Heart } from 'lucide-react';
 import VSL from '../components/VSL';
 import ReferralForm from '../components/ReferralForm';
 import { captureTrackingParams, getReferralCode } from '../utils/tracking';
+import { trackReferralClick } from '../utils/webhook';
 
 const VSL_MEDIA_ID = 'jn8el9or7a';
 
@@ -11,8 +12,15 @@ export default function ReferralLanding() {
 
   useEffect(() => {
     const tracking = captureTrackingParams();
-    setReferralCode(getReferralCode(tracking));
+    const code = getReferralCode(tracking);
+    setReferralCode(code);
     document.title = 'Te recomiendan Selvadentro Tulum';
+
+    // Fire-and-forget click tracking when an affiliate code is in the URL.
+    // Unknown / inactive codes are silently ignored by the RPC.
+    if (code) {
+      void trackReferralClick(code, tracking);
+    }
   }, []);
 
   return (

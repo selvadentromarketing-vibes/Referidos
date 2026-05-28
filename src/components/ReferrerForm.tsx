@@ -1,5 +1,5 @@
 import { useState, FormEvent } from 'react';
-import { Loader2, CheckCircle2, Mail } from 'lucide-react';
+import { Loader2, CheckCircle2, Copy, Check, Share2 } from 'lucide-react';
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import type { Value as PhoneValue } from 'react-phone-number-input';
 import { submitReferrerSignup } from '../utils/webhook';
@@ -19,6 +19,8 @@ export default function ReferrerForm() {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [referralLink, setReferralLink] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -41,31 +43,85 @@ export default function ReferrerForm() {
       tracking,
     );
 
-    if (result.success) {
+    if (result.success && result.referral_link) {
+      setReferralLink(result.referral_link);
       setStatus('success');
     } else {
       setStatus('error');
+      const errMsg =
+        result.error instanceof Error ? result.error.message : null;
       setErrorMessage(
-        'No pudimos procesar tu solicitud. Intenta de nuevo o escríbenos a d.comercial@selvadentrotulum.com.',
+        errMsg ??
+          'No pudimos procesar tu solicitud. Intenta de nuevo o escríbenos a d.comercial@selvadentrotulum.com.',
       );
     }
   };
 
-  if (status === 'success') {
+  const copyLink = async () => {
+    if (!referralLink) return;
+    try {
+      await navigator.clipboard.writeText(referralLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // older browsers — fall back to selection-only
+    }
+  };
+
+  const whatsappShare = () => {
+    if (!referralLink) return;
+    const msg = encodeURIComponent(
+      `Te comparto este proyecto en Tulum que me tiene impresionado — Selvadentro: ${referralLink}`,
+    );
+    window.open(`https://wa.me/?text=${msg}`, '_blank', 'noopener,noreferrer');
+  };
+
+  if (status === 'success' && referralLink) {
     return (
-      <div className="w-full max-w-md mx-auto bg-white rounded-2xl p-8 shadow-2xl text-center border border-stone-100">
-        <CheckCircle2 className="w-14 h-14 text-brand-olive mx-auto mb-4" />
-        <h3 className="font-cardo text-2xl font-bold text-brand-dark-green mb-3">
-          ¡Bienvenido al programa!
-        </h3>
-        <div className="flex items-start gap-3 bg-[#F8F5EF] rounded-xl p-4 mb-4 text-left">
-          <Mail className="w-5 h-5 text-brand-copper shrink-0 mt-0.5" />
-          <p className="text-sm text-stone-700 leading-relaxed">
-            En los próximos minutos recibirás un correo con <strong>tu link de referido</strong> personalizado. Compártelo con tu círculo y comienza a ganar por cada inversión.
+      <div className="w-full max-w-md mx-auto bg-white rounded-2xl p-6 sm:p-8 shadow-2xl border border-stone-100">
+        <div className="text-center mb-5">
+          <CheckCircle2 className="w-14 h-14 text-brand-olive mx-auto mb-3" />
+          <h3 className="font-cardo text-2xl font-bold text-brand-dark-green mb-1">
+            ¡Bienvenido al programa!
+          </h3>
+          <p className="text-sm text-stone-600">
+            Este es tu link personalizado. Compártelo y empieza a ganar.
           </p>
         </div>
-        <p className="text-xs text-stone-500">
-          ¿No recibes el correo? Revisa tu spam o escríbenos a{' '}
+
+        <div className="bg-[#F8F5EF] rounded-xl p-3 mb-4 border border-stone-200">
+          <code className="block text-xs sm:text-sm text-brand-dark-green break-all leading-relaxed font-mono">
+            {referralLink}
+          </code>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          <button
+            type="button"
+            onClick={copyLink}
+            className="flex items-center justify-center gap-2 px-4 py-3 bg-brand-olive text-white rounded-lg font-semibold text-sm hover:bg-brand-dark-green transition-all"
+          >
+            {copied ? (
+              <>
+                <Check className="w-4 h-4" /> Copiado
+              </>
+            ) : (
+              <>
+                <Copy className="w-4 h-4" /> Copiar link
+              </>
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={whatsappShare}
+            className="flex items-center justify-center gap-2 px-4 py-3 bg-[#25D366] text-white rounded-lg font-semibold text-sm hover:bg-[#1ebe5d] transition-all"
+          >
+            <Share2 className="w-4 h-4" /> WhatsApp
+          </button>
+        </div>
+
+        <p className="text-[11px] text-stone-500 text-center leading-relaxed">
+          También enviamos el link a tu correo. ¿No lo recibes? Revisa spam o escríbenos a{' '}
           <a href="mailto:d.comercial@selvadentrotulum.com" className="text-brand-olive underline">
             d.comercial@selvadentrotulum.com
           </a>
