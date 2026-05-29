@@ -166,16 +166,18 @@ export const submitReferralLead = async (
   data: ReferralLeadData,
   tracking: TrackingParams,
 ): Promise<SubmissionResult> => {
-  const affiliate_code: string | null =
+  const referred_by: string | null =
     tracking.ref || tracking.referrer || tracking.affiliate_id || tracking.aff || null;
 
-  // Step 1 — Insert into Supabase via RPC (links to affiliate by code).
-  const { error: rpcError } = await supabase.rpc('create_lead', {
+  // Step 1 — Insert into Supabase via RPC. The RPC also looks up the
+  // referring affiliate's name + email so we can include them on the
+  // GHL contact for sales context (no need to cross-reference later).
+  const { data: rpcRows, error: rpcError } = await supabase.rpc('create_lead', {
     p_first_name: data.first_name,
     p_last_name: data.last_name || null,
     p_email: data.email,
     p_phone: data.phone,
-    p_referral_code: affiliate_code,
+    p_referral_code: referred_by,
     p_landing_page: tracking.landing_page,
     p_utm_source: tracking.utm_source ?? null,
     p_utm_campaign: tracking.utm_campaign ?? null,
@@ -185,6 +187,10 @@ export const submitReferralLead = async (
     console.error('Supabase create_lead failed:', rpcError);
     return { success: false, error: rpcError };
   }
+
+  const row = Array.isArray(rpcRows) ? rpcRows[0] : rpcRows;
+  const referred_by_name: string | null = row?.referred_by_name ?? null;
+  const referred_by_email: string | null = row?.referred_by_email ?? null;
 
   // Step 2 — Forward to GHL with attribution. Best-effort.
   try {
@@ -196,10 +202,12 @@ export const submitReferralLead = async (
       phone: data.phone,
       language: 'Spanish',
       form_type: 'referral-lead',
-      // Affiliate attribution — single clean field name.
-      // Whichever URL param matched (ref / aff / affiliate_id / referrer)
-      // gets normalized to this single key for GHL mapping.
-      referred_by_code: affiliate_code,
+      // Affiliate attribution — three fields for sales context.
+      // The code is for lookup/joins, the name/email surface immediately on
+      // the lead's GHL profile so sales sees who referred them at a glance.
+      referred_by,
+      referred_by_name,
+      referred_by_email,
       source_label: 'referidos-lead',
       tags: ['referidos', 'referral-lead'],
       'contact.source': 'Referidos - Lead',

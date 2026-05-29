@@ -172,6 +172,8 @@ BEGIN
 END;
 $$;
 
+-- v2: returns the referring affiliate's name + email so the GHL payload
+-- can include them as referred_by_name / referred_by_email custom fields.
 CREATE OR REPLACE FUNCTION create_lead(
   p_first_name    TEXT,
   p_last_name     TEXT,
@@ -181,18 +183,28 @@ CREATE OR REPLACE FUNCTION create_lead(
   p_landing_page  TEXT,
   p_utm_source    TEXT,
   p_utm_campaign  TEXT
-) RETURNS TABLE (id UUID)
+) RETURNS TABLE (
+  id                  UUID,
+  referred_by_name    TEXT,
+  referred_by_email   TEXT
+)
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE
-  v_affiliate_id UUID;
-  v_lead_id      UUID;
+  v_affiliate_id    UUID;
+  v_lead_id         UUID;
+  v_affiliate_name  TEXT;
+  v_affiliate_email TEXT;
 BEGIN
   IF p_referral_code IS NOT NULL AND p_referral_code <> '' THEN
-    SELECT a.id INTO v_affiliate_id FROM affiliates a
-    WHERE a.code = p_referral_code AND a.status = 'active';
+    SELECT a.id,
+           trim(coalesce(a.first_name, '') || ' ' || coalesce(a.last_name, '')),
+           a.email
+    INTO   v_affiliate_id, v_affiliate_name, v_affiliate_email
+    FROM   affiliates a
+    WHERE  a.code = p_referral_code AND a.status = 'active';
   END IF;
   INSERT INTO leads (
     first_name, last_name, email, phone,
@@ -203,7 +215,7 @@ BEGIN
     v_affiliate_id, p_landing_page, p_utm_source, p_utm_campaign
   )
   RETURNING leads.id INTO v_lead_id;
-  RETURN QUERY SELECT v_lead_id;
+  RETURN QUERY SELECT v_lead_id, v_affiliate_name, v_affiliate_email;
 END;
 $$;
 
