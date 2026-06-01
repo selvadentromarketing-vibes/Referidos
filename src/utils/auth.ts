@@ -12,6 +12,7 @@ const ADMIN_EMAILS = [
   'd.comercial@selvadentrotulum.com',
   'mkt@selvadentrotulum.com',
   'selvadentromarketing@gmail.com',
+  'hoshicoetowork@gmail.com',
 ] as const;
 
 export const isAdminEmail = (email: string | null | undefined): boolean => {
