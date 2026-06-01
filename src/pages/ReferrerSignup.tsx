@@ -24,10 +24,10 @@ export default function ReferrerSignup() {
             />
           </a>
           <a
-            href="tel:+529841374927"
+            href="tel:+529994890828"
             className="hidden sm:inline-block text-white/85 hover:text-white text-sm tracking-wide"
           >
-            +52 984 137 4927
+            +52 999 489 0828
           </a>
         </div>
       </header>
@@ -164,8 +164,8 @@ export default function ReferrerSignup() {
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
           <span>© {new Date().getFullYear()} Selvadentro Tulum · Programa de Referidos</span>
           <span>
-            <a href="tel:+529841374927" className="hover:text-white">
-              +52 984 137 4927
+            <a href="tel:+529994890828" className="hover:text-white">
+              +52 999 489 0828
             </a>
             <span className="mx-2">·</span>
             <a href="mailto:d.comercial@selvadentrotulum.com" className="hover:text-white">

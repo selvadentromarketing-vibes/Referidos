@@ -171,7 +171,7 @@ export default function ReferrerForm() {
               countryCallingCodeEditable={false}
               value={phone}
               onChange={setPhone}
-              placeholder="984 137 4927"
+              placeholder="999 489 0828"
               autoComplete="tel"
               numberInputProps={{ 'aria-label': 'Teléfono', required: true }}
             />
