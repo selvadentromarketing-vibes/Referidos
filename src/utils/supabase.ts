@@ -26,10 +26,11 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    // Referidos has no user-facing login in V1 — disable auth persistence
-    // so we don't waste a localStorage write on every page load.
-    persistSession: false,
-    autoRefreshToken: false,
+    // V2: persist sessions so affiliates + admins stay logged in across
+    // page loads and magic-link redirects work.
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
   },
 });
 
