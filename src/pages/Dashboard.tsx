@@ -120,10 +120,13 @@ export default function Dashboard() {
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
+  const [notAffiliate, setNotAffiliate] = useState(false);
+
   useEffect(() => {
     let mounted = true;
     setLoading(true);
     setError(null);
+    setNotAffiliate(false);
 
     Promise.all([
       supabase.rpc('get_my_dashboard'),
@@ -135,9 +138,9 @@ export default function Dashboard() {
         if (refsRes.error) throw refsRes.error;
         const dashRow = Array.isArray(dashRes.data) ? dashRes.data[0] : dashRes.data;
         if (!dashRow) {
-          setError(
-            'No encontramos tu registro de afiliado. Si te registraste hace poco, espera unos minutos y vuelve a intentar.',
-          );
+          // The auth user has no affiliate row yet. Distinct from a system error
+          // — show a "sign up first" CTA, not a scary error message.
+          setNotAffiliate(true);
           return;
         }
         setData(dashRow as DashboardData);
@@ -146,7 +149,12 @@ export default function Dashboard() {
       .catch((e: unknown) => {
         if (!mounted) return;
         console.error('Dashboard load failed:', e);
-        setError('No pudimos cargar tu dashboard. Intenta refrescar la página.');
+        // Surface the actual Postgres / Supabase error message so we can debug.
+        const msg =
+          e && typeof e === 'object' && 'message' in e
+            ? String((e as { message: unknown }).message)
+            : 'Error desconocido';
+        setError(msg);
       })
       .finally(() => {
         if (mounted) setLoading(false);
@@ -217,16 +225,48 @@ export default function Dashboard() {
           </div>
         )}
 
+        {/* NOT YET AN AFFILIATE */}
+        {!loading && notAffiliate && (
+          <div className="bg-white rounded-2xl p-8 sm:p-10 border border-stone-100 shadow-sm text-center">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-brand-copper/15 text-brand-copper mb-4">
+              <Users className="w-6 h-6" />
+            </div>
+            <h2 className="font-cardo text-2xl sm:text-3xl font-bold text-brand-dark-green mb-3">
+              Aún no eres afiliado
+            </h2>
+            <p className="text-sm sm:text-base text-stone-600 leading-relaxed mb-6 max-w-md mx-auto">
+              Tu correo <strong>{user?.email}</strong> no está registrado en el Programa de Referidos. Regístrate y recibe tu link personalizado en menos de 2 minutos.
+            </p>
+            <a
+              href="/"
+              className="inline-block px-8 py-4 bg-brand-olive text-white rounded-full font-semibold text-base hover:bg-brand-dark-green transition-all shadow-lg"
+            >
+              Registrarme como afiliado
+            </a>
+            <p className="mt-4 text-xs text-stone-500">
+              ¿Crees que es un error? Escríbenos a{' '}
+              <a href="mailto:d.comercial@selvadentrotulum.com" className="text-brand-olive underline">
+                d.comercial@selvadentrotulum.com
+              </a>
+            </p>
+          </div>
+        )}
+
         {/* ERROR */}
         {!loading && error && (
           <div className="bg-white rounded-2xl p-8 border border-red-100 shadow-sm">
             <div className="flex items-start gap-4">
               <AlertCircle className="w-6 h-6 text-red-500 shrink-0 mt-0.5" />
-              <div>
+              <div className="flex-1">
                 <h2 className="font-cardo text-xl font-bold text-brand-dark-green mb-2">
                   No pudimos cargar tu dashboard
                 </h2>
-                <p className="text-sm text-stone-600 leading-relaxed mb-4">{error}</p>
+                <p className="text-sm text-stone-600 leading-relaxed mb-3">
+                  El servidor respondió con un error. Detalle técnico:
+                </p>
+                <pre className="text-xs bg-stone-50 border border-stone-200 rounded-lg p-3 mb-4 overflow-x-auto text-red-700 whitespace-pre-wrap">
+                  {error}
+                </pre>
                 <button
                   onClick={() => window.location.reload()}
                   className="text-sm text-brand-olive hover:text-brand-dark-green underline"
@@ -239,7 +279,7 @@ export default function Dashboard() {
         )}
 
         {/* DATA */}
-        {!loading && !error && data && (
+        {!loading && !error && !notAffiliate && data && (
           <>
             {/* HERO */}
             <div className="mb-8">
