@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, FormEvent } from 'react';
 import {
   LogOut, Shield, Loader2, RefreshCw, AlertCircle,
   Users, MousePointerClick, Trophy, CircleDollarSign, Briefcase,
-  CheckCircle2, X, Edit2, DollarSign, ChevronDown, Search,
+  CheckCircle2, X, Edit2, DollarSign, ChevronDown, Search, ExternalLink,
 } from 'lucide-react';
 import { useAuth, signOut } from '../utils/auth';
 import { supabase } from '../utils/supabase';
@@ -34,6 +34,7 @@ interface LeaderboardRow {
   won_count: number;
   commissions_owed: number;
   commissions_paid: number;
+  ghl_contact_id: string | null;
 }
 
 interface LeadRow {
@@ -42,11 +43,13 @@ interface LeadRow {
   last_name: string | null;
   email: string;
   phone: string;
-  status: 'new' | 'contacted' | 'qualified' | 'won' | 'lost';
+  status: 'new' | 'contacted' | 'qualified' | 'zoom' | 'tour' | 'opp' | 'won' | 'lost';
   created_at: string;
   affiliate_code: string | null;
   affiliate_name: string | null;
   affiliate_email: string | null;
+  ghl_contact_id: string | null;
+  affiliate_ghl_contact_id: string | null;
 }
 
 interface PendingCommissionRow {
@@ -59,6 +62,34 @@ interface PendingCommissionRow {
   currency: string;
   escritura_date: string | null;
   created_at: string;
+  affiliate_ghl_contact_id: string | null;
+}
+
+// ─── GHL link helpers ─────────────────────────────────────────────────────
+// The GHL location ID is embedded in the inbound webhook URLs we already use.
+const GHL_LOCATION_ID = 'crN2IhAuOBAl7D8324yI';
+
+function ghlContactLink(ghl_contact_id: string | null | undefined, email: string): string {
+  if (ghl_contact_id) {
+    return `https://app.gohighlevel.com/v2/location/${GHL_LOCATION_ID}/contacts/detail/${ghl_contact_id}`;
+  }
+  // Fallback: open GHL contacts list with the email pre-filled in the search box.
+  return `https://app.gohighlevel.com/v2/location/${GHL_LOCATION_ID}/contacts/?search=${encodeURIComponent(email)}`;
+}
+
+function GhlLink({ contactId, email, label = 'GHL' }: { contactId: string | null | undefined; email: string; label?: string }) {
+  if (!email) return null;
+  return (
+    <a
+      href={ghlContactLink(contactId, email)}
+      target="_blank"
+      rel="noopener noreferrer"
+      title={contactId ? 'Abrir contacto en GHL' : 'Buscar en GHL por email'}
+      className="inline-flex items-center gap-1 text-xs text-brand-olive hover:text-brand-dark-green underline"
+    >
+      <ExternalLink className="w-3 h-3" /> {label}
+    </a>
+  );
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
@@ -77,15 +108,26 @@ const relativeTime = (iso: string): string => {
 };
 
 const STATUS_LABEL: Record<LeadRow['status'], string> = {
-  new: 'Nuevo', contacted: 'Contactado', qualified: 'Calificado', won: 'Cerrado', lost: 'Perdido',
+  new: 'Nuevo',
+  contacted: 'Contactado',
+  qualified: 'Calificado',
+  zoom: 'Zoom',
+  tour: 'Tour',
+  opp: 'Cotización',
+  won: 'Cerrado',
+  lost: 'Perdido',
 };
 const STATUS_BG: Record<LeadRow['status'], string> = {
   new: 'bg-stone-100 text-stone-700 border-stone-200',
   contacted: 'bg-amber-50 text-amber-800 border-amber-200',
   qualified: 'bg-blue-50 text-blue-800 border-blue-200',
+  zoom: 'bg-indigo-50 text-indigo-800 border-indigo-200',
+  tour: 'bg-purple-50 text-purple-800 border-purple-200',
+  opp: 'bg-violet-50 text-violet-800 border-violet-200',
   won: 'bg-emerald-50 text-emerald-800 border-emerald-200',
   lost: 'bg-red-50 text-red-800 border-red-200',
 };
+const STATUS_ORDER: LeadRow['status'][] = ['new', 'contacted', 'qualified', 'zoom', 'tour', 'opp', 'won', 'lost'];
 
 // ─── Inline UI bits ───────────────────────────────────────────────────────
 
@@ -456,7 +498,10 @@ export default function Admin() {
                         <tr key={c.id} className="border-b border-stone-50 last:border-0 hover:bg-stone-50/50">
                           <td className="px-4 sm:px-6 py-3">
                             <div className="font-medium text-brand-dark-green">{c.affiliate_name}</div>
-                            <div className="text-xs text-stone-500">{c.affiliate_email}</div>
+                            <div className="text-xs text-stone-500 flex items-center gap-2">
+                              <span>{c.affiliate_email}</span>
+                              <GhlLink contactId={c.affiliate_ghl_contact_id} email={c.affiliate_email} />
+                            </div>
                           </td>
                           <td className="px-4 py-3 text-stone-700">{c.lead_name}</td>
                           <td className="px-4 py-3 text-right font-mono font-semibold text-brand-dark-green">
@@ -497,10 +542,24 @@ export default function Admin() {
                       {leads.map((l) => (
                         <tr key={l.id} className="border-b border-stone-50 last:border-0 hover:bg-stone-50/50">
                           <td className="px-4 sm:px-6 py-3">
-                            <div className="font-medium text-brand-dark-green">{l.first_name} {l.last_name ?? ''}</div>
+                            <div className="font-medium text-brand-dark-green flex items-center gap-2">
+                              {l.first_name} {l.last_name ?? ''}
+                              <GhlLink contactId={l.ghl_contact_id} email={l.email} />
+                            </div>
                             <div className="text-xs text-stone-500">{l.email}</div>
                           </td>
-                          <td className="px-4 py-3 text-stone-700">{l.affiliate_name ?? <em className="text-stone-400">directo</em>}</td>
+                          <td className="px-4 py-3 text-stone-700">
+                            {l.affiliate_name ? (
+                              <div className="flex items-center gap-2">
+                                <span>{l.affiliate_name}</span>
+                                {l.affiliate_email && (
+                                  <GhlLink contactId={l.affiliate_ghl_contact_id} email={l.affiliate_email} />
+                                )}
+                              </div>
+                            ) : (
+                              <em className="text-stone-400">directo</em>
+                            )}
+                          </td>
                           <td className="px-4 py-3 text-stone-500 text-xs whitespace-nowrap">{relativeTime(l.created_at)}</td>
                           <td className="px-4 py-3">
                             <div className="relative inline-block">
@@ -512,7 +571,7 @@ export default function Admin() {
                                 }}
                                 className={`appearance-none pr-7 pl-3 py-1 rounded-full text-xs font-semibold border cursor-pointer ${STATUS_BG[l.status]}`}
                               >
-                                {(['new','contacted','qualified','won','lost'] as const).map((s) => (
+                                {STATUS_ORDER.map((s) => (
                                   <option key={s} value={s}>{STATUS_LABEL[s]}</option>
                                 ))}
                               </select>
@@ -570,7 +629,10 @@ export default function Admin() {
                       {filteredLb.map((a) => (
                         <tr key={a.id} className="border-b border-stone-50 last:border-0 hover:bg-stone-50/50">
                           <td className="px-4 sm:px-6 py-3">
-                            <div className="font-medium text-brand-dark-green">{a.first_name} {a.last_name ?? ''}</div>
+                            <div className="font-medium text-brand-dark-green flex items-center gap-2">
+                              {a.first_name} {a.last_name ?? ''}
+                              <GhlLink contactId={a.ghl_contact_id} email={a.email} />
+                            </div>
                             <div className="text-xs text-stone-500 font-mono">{a.code}</div>
                             <div className="text-xs text-stone-500">{a.email}</div>
                           </td>

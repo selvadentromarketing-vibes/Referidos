@@ -34,7 +34,7 @@ interface ReferralRow {
   id: string;
   first_name: string;
   last_name: string | null;
-  status: 'new' | 'contacted' | 'qualified' | 'won' | 'lost';
+  status: 'new' | 'contacted' | 'qualified' | 'zoom' | 'tour' | 'opp' | 'won' | 'lost';
   created_at: string;
 }
 
@@ -59,6 +59,9 @@ const STATUS_LABEL: Record<ReferralRow['status'], string> = {
   new: 'Nuevo',
   contacted: 'Contactado',
   qualified: 'Calificado',
+  zoom: 'Zoom',
+  tour: 'Tour',
+  opp: 'Cotización',
   won: 'Cerrado',
   lost: 'Perdido',
 };
@@ -67,6 +70,9 @@ const STATUS_BG: Record<ReferralRow['status'], string> = {
   new: 'bg-stone-100 text-stone-700 border-stone-200',
   contacted: 'bg-amber-50 text-amber-800 border-amber-200',
   qualified: 'bg-blue-50 text-blue-800 border-blue-200',
+  zoom: 'bg-indigo-50 text-indigo-800 border-indigo-200',
+  tour: 'bg-purple-50 text-purple-800 border-purple-200',
+  opp: 'bg-violet-50 text-violet-800 border-violet-200',
   won: 'bg-emerald-50 text-emerald-800 border-emerald-200',
   lost: 'bg-red-50 text-red-800 border-red-200',
 };

@@ -149,10 +149,10 @@ export default function ReferrerSignup() {
             <div className="rounded-2xl p-6 border border-stone-100 bg-[#F8F5EF]">
               <DollarSign className="w-8 h-8 text-brand-olive mb-3" />
               <h3 className="font-cardo text-lg font-bold text-brand-dark-green mb-2">
-                Comisión transparente
+                Comisión al recibir el enganche
               </h3>
               <p className="text-sm text-stone-700 leading-relaxed">
-                Pago al escriturar el referido. Sin letra chica, sin retrasos.
+                Sin letra chica, sin retrasos.
               </p>
             </div>
           </div>
