@@ -172,6 +172,11 @@ BEGIN
 END;
 $$;
 
+-- NOTE: get_my_dashboard and admin_leaderboard use qualified column references
+-- (leads.status, commissions.status) inside FILTER clauses because Postgres
+-- otherwise sees ambiguity with the "status" OUT parameter on the function's
+-- RETURN TABLE. See db/migrations/2026-06-01-fix-status-ambiguity.sql.
+
 -- v2: returns the referring affiliate's name + email so the GHL payload
 -- can include them as referred_by_name / referred_by_email custom fields.
 CREATE OR REPLACE FUNCTION create_lead(
