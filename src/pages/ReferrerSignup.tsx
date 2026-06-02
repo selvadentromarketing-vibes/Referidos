@@ -77,7 +77,7 @@ export default function ReferrerSignup() {
           }}
         />
         <div className="relative max-w-3xl mx-auto">
-          <div className="mb-6 inline-flex flex-col items-center">
+          <div className="mb-6 flex flex-col items-center">
             <img
               src="/logo-selvandentro_tulum.webp"
               alt="Selvadentro"
