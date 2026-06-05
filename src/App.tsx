@@ -1,46 +1,55 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import ReferrerSignup from './pages/ReferrerSignup';
 import ReferralLanding from './pages/ReferralLanding';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Admin from './pages/Admin';
 import ProtectedRoute from './components/ProtectedRoute';
+import { DEFAULT_LANG } from './i18n/translations';
+
+// Redirect legacy unprefixed URLs to /es/... so existing affiliate links keep working.
+function LegacyRedirect({ to }: { to: string }) {
+  const location = useLocation();
+  return <Navigate to={`/${DEFAULT_LANG}${to}${location.search}${location.hash}`} replace />;
+}
 
 function App() {
   return (
     <Router>
       <Routes>
-        {/* Public — referrer signs up here to become an affiliate. */}
-        <Route path="/" element={<ReferrerSignup />} />
+        {/* Root → default language landing. Mexican audience is primary. */}
+        <Route path="/" element={<Navigate to={`/${DEFAULT_LANG}`} replace />} />
 
-        {/* Public — prospects who clicked a referrer's tracking link land here.
-            GHL's affiliate cookie should already be set by the time they arrive;
-            we also forward any ?ref / ?affiliate_id params to the form payload. */}
-        <Route path="/invitacion" element={<ReferralLanding />} />
+        {/* Language-prefixed routes (/es/* and /en/*). The pages read the
+            :lang param via useLang() to pick the right translation tree. */}
+        <Route path="/:lang">
+          <Route index element={<ReferrerSignup />} />
+          <Route path="invitacion" element={<ReferralLanding />} />
+          <Route path="login" element={<Login />} />
+          <Route
+            path="dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="admin"
+            element={
+              <ProtectedRoute requireAdmin>
+                <Admin />
+              </ProtectedRoute>
+            }
+          />
+        </Route>
 
-        {/* Auth — magic-link login form. Redirects to /dashboard or /admin once
-            the session is established. */}
-        <Route path="/login" element={<Login />} />
-
-        {/* Authed — affiliate sees their own stats + link. */}
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Authed admin only — leaderboard + payout + affiliate management. */}
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute requireAdmin>
-              <Admin />
-            </ProtectedRoute>
-          }
-        />
+        {/* Legacy unprefixed URLs → 302 to /es/... so previously-shared
+            referral links and email links keep working. */}
+        <Route path="/invitacion" element={<LegacyRedirect to="/invitacion" />} />
+        <Route path="/login" element={<LegacyRedirect to="/login" />} />
+        <Route path="/dashboard" element={<LegacyRedirect to="/dashboard" />} />
+        <Route path="/admin" element={<LegacyRedirect to="/admin" />} />
       </Routes>
     </Router>
   );
