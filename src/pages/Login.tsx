@@ -32,11 +32,21 @@ export default function Login() {
     const result = await sendMagicLink(email, redirectPath);
     if (result.success) {
       setStatus('sent');
-    } else {
-      setStatus('error');
+      return;
+    }
+    setStatus('error');
+    // Translate common Supabase auth errors to Spanish + actionable guidance.
+    const raw = (result.error ?? '').toLowerCase();
+    if (raw.includes('rate limit') || raw.includes('too many') || raw.includes('over_email_send_rate_limit')) {
       setErrorMessage(
-        result.error ?? 'No pudimos enviar el correo. Intenta de nuevo en un momento.',
+        'Demasiados envíos recientes. Por seguridad Supabase limita los correos de acceso. Espera unos minutos antes de intentar de nuevo o escríbenos a d.comercial@selvadentrotulum.com para ayuda inmediata.',
       );
+    } else if (raw.includes('invalid email') || raw.includes('not a valid email')) {
+      setErrorMessage('Ese correo no parece válido. Revísalo e intenta de nuevo.');
+    } else if (raw) {
+      setErrorMessage(`No pudimos enviar el correo: ${result.error}`);
+    } else {
+      setErrorMessage('No pudimos enviar el correo. Intenta de nuevo en un momento.');
     }
   };
 

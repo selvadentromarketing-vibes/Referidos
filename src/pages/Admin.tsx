@@ -425,13 +425,22 @@ export default function Admin() {
               <Shield className="w-3 h-3" /> Admin
             </span>
           </div>
-          <div className="flex items-center gap-3 sm:gap-5">
+          <div className="flex items-center gap-2 sm:gap-4">
+            <a
+              href="/dashboard"
+              className="flex items-center gap-1.5 text-xs sm:text-sm text-white/85 hover:text-white px-3 py-1.5 rounded-full hover:bg-white/10 transition"
+              title="Ver mi dashboard de afiliado"
+            >
+              <Users className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Mi dashboard</span>
+              <span className="sm:hidden">Mío</span>
+            </a>
             <button onClick={fetchAll} disabled={loading}
               className="flex items-center gap-1.5 text-xs sm:text-sm text-white/85 hover:text-white px-3 py-1.5 rounded-full hover:bg-white/10 transition disabled:opacity-50">
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
               <span className="hidden sm:inline">Actualizar</span>
             </button>
-            <span className="text-xs sm:text-sm text-white/75 hidden md:inline truncate max-w-[200px]">{user?.email}</span>
+            <span className="text-xs sm:text-sm text-white/75 hidden lg:inline truncate max-w-[180px]">{user?.email}</span>
             <button onClick={() => signOut()} className="flex items-center gap-1.5 text-xs sm:text-sm text-white/85 hover:text-white px-3 py-1.5 rounded-full hover:bg-white/10 transition">
               <LogOut className="w-3.5 h-3.5" /><span className="hidden sm:inline">Salir</span>
             </button>

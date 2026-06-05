@@ -11,6 +11,7 @@ import {
   Trophy,
   CircleDollarSign,
   AlertCircle,
+  Shield,
 } from 'lucide-react';
 import { useAuth, signOut } from '../utils/auth';
 import { supabase } from '../utils/supabase';
@@ -119,7 +120,7 @@ function StatCard({ icon, label, value, accent = 'olive' }: StatCardProps) {
 // ─── Page ─────────────────────────────────────────────────────────────────
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [data, setData] = useState<DashboardData | null>(null);
   const [referrals, setReferrals] = useState<ReferralRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -206,8 +207,18 @@ export default function Dashboard() {
               className="h-8 sm:h-9 w-auto"
             />
           </a>
-          <div className="flex items-center gap-3 sm:gap-5">
-            <span className="text-xs sm:text-sm text-white/75 hidden sm:inline truncate max-w-[200px]">
+          <div className="flex items-center gap-2 sm:gap-4">
+            {isAdmin && (
+              <a
+                href="/admin"
+                className="flex items-center gap-1.5 text-xs sm:text-sm text-brand-copper hover:text-white px-3 py-1.5 rounded-full hover:bg-brand-copper/20 border border-brand-copper/40 transition"
+              >
+                <Shield className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Panel admin</span>
+                <span className="sm:hidden">Admin</span>
+              </a>
+            )}
+            <span className="text-xs sm:text-sm text-white/75 hidden md:inline truncate max-w-[180px]">
               {user?.email}
             </span>
             <button
