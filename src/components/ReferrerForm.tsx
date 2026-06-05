@@ -4,6 +4,7 @@ import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import type { Value as PhoneValue } from 'react-phone-number-input';
 import { submitReferrerSignup } from '../utils/webhook';
 import { captureTrackingParams } from '../utils/tracking';
+import { useLang } from '../i18n/useLang';
 
 const splitName = (full: string): { first: string; last: string } => {
   const trimmed = full.trim().replace(/\s+/g, ' ');
@@ -14,6 +15,7 @@ const splitName = (full: string): { first: string; last: string } => {
 };
 
 export default function ReferrerForm() {
+  const { t } = useLang();
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState<PhoneValue | undefined>(undefined);
   const [email, setEmail] = useState('');
@@ -27,11 +29,11 @@ export default function ReferrerForm() {
     setErrorMessage(null);
 
     if (!fullName.trim() || !phone || !email.trim()) {
-      setErrorMessage('Por favor completa todos los campos.');
+      setErrorMessage(t.referrerForm.errorMissing);
       return;
     }
     if (!isValidPhoneNumber(phone)) {
-      setErrorMessage('Ingresa un teléfono válido (incluye lada).');
+      setErrorMessage(t.referrerForm.errorPhone);
       return;
     }
 
@@ -48,12 +50,8 @@ export default function ReferrerForm() {
       setStatus('success');
     } else {
       setStatus('error');
-      const errMsg =
-        result.error instanceof Error ? result.error.message : null;
-      setErrorMessage(
-        errMsg ??
-          'No pudimos procesar tu solicitud. Intenta de nuevo o escríbenos a d.comercial@selvadentrotulum.com.',
-      );
+      const errMsg = result.error instanceof Error ? result.error.message : null;
+      setErrorMessage(errMsg ?? t.referrerForm.errorSubmit);
     }
   };
 
@@ -64,7 +62,7 @@ export default function ReferrerForm() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // older browsers — fall back to selection-only
+      /* older browsers */
     }
   };
 
@@ -81,18 +79,12 @@ export default function ReferrerForm() {
       <div className="w-full max-w-md mx-auto bg-white rounded-2xl p-6 sm:p-8 shadow-2xl border border-stone-100">
         <div className="text-center mb-5">
           <CheckCircle2 className="w-14 h-14 text-brand-olive mx-auto mb-3" />
-          <h3 className="font-cardo text-2xl font-bold text-brand-dark-green mb-1">
-            ¡Bienvenido al programa!
-          </h3>
-          <p className="text-sm text-stone-600">
-            Este es tu link personalizado. Compártelo y empieza a ganar.
-          </p>
+          <h3 className="font-cardo text-2xl font-bold text-brand-dark-green mb-1">{t.referrerForm.successTitle}</h3>
+          <p className="text-sm text-stone-600">{t.referrerForm.successBody}</p>
         </div>
 
         <div className="bg-[#F8F5EF] rounded-xl p-3 mb-4 border border-stone-200">
-          <code className="block text-xs sm:text-sm text-brand-dark-green break-all leading-relaxed font-mono">
-            {referralLink}
-          </code>
+          <code className="block text-xs sm:text-sm text-brand-dark-green break-all leading-relaxed font-mono">{referralLink}</code>
         </div>
 
         <div className="grid grid-cols-2 gap-2 mb-4">
@@ -103,11 +95,11 @@ export default function ReferrerForm() {
           >
             {copied ? (
               <>
-                <Check className="w-4 h-4" /> Copiado
+                <Check className="w-4 h-4" /> {t.common.copied}
               </>
             ) : (
               <>
-                <Copy className="w-4 h-4" /> Copiar link
+                <Copy className="w-4 h-4" /> {t.common.copy}
               </>
             )}
           </button>
@@ -116,14 +108,14 @@ export default function ReferrerForm() {
             onClick={whatsappShare}
             className="flex items-center justify-center gap-2 px-4 py-3 bg-[#25D366] text-white rounded-lg font-semibold text-sm hover:bg-[#1ebe5d] transition-all"
           >
-            <Share2 className="w-4 h-4" /> WhatsApp
+            <Share2 className="w-4 h-4" /> {t.common.shareWhatsapp}
           </button>
         </div>
 
         <p className="text-[11px] text-stone-500 text-center leading-relaxed">
-          También enviamos el link a tu correo. ¿No lo recibes? Revisa spam o escríbenos a{' '}
-          <a href="mailto:d.comercial@selvadentrotulum.com" className="text-brand-olive underline">
-            d.comercial@selvadentrotulum.com
+          {t.referrerForm.emailReminderPre}{' '}
+          <a href={`mailto:${t.common.contactSupportEmail}`} className="text-brand-olive underline">
+            {t.common.contactSupportEmail}
           </a>
           .
         </p>
@@ -137,24 +129,18 @@ export default function ReferrerForm() {
       className="w-full max-w-md mx-auto bg-white rounded-2xl p-6 sm:p-8 shadow-2xl border border-stone-100"
       noValidate
     >
-      <h3 className="font-cardo text-2xl sm:text-3xl font-bold text-brand-dark-green mb-1 leading-tight">
-        Genera tu link de referido
-      </h3>
-      <p className="text-sm text-stone-600 mb-5">
-        Te enviamos tu link personalizado en menos de 2 minutos.
-      </p>
+      <h3 className="font-cardo text-2xl sm:text-3xl font-bold text-brand-dark-green mb-1 leading-tight">{t.referrerForm.title}</h3>
+      <p className="text-sm text-stone-600 mb-5">{t.referrerForm.subtitle}</p>
 
       <div className="space-y-3">
         <label className="block">
-          <span className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1">
-            Nombre completo
-          </span>
+          <span className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1">{t.referrerForm.fieldName}</span>
           <input
             type="text"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             className="w-full px-4 py-3 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-olive/40 focus:border-brand-olive transition"
-            placeholder="Tu nombre"
+            placeholder={t.referrerForm.placeholderName}
             autoComplete="name"
             required
           />
@@ -162,7 +148,7 @@ export default function ReferrerForm() {
 
         <label className="block">
           <span className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1">
-            Teléfono <span className="text-brand-copper">*</span>
+            {t.referrerForm.fieldPhone} <span className="text-brand-copper">*</span>
           </span>
           <div className="phone-input-shell px-4 py-3 border border-stone-300 rounded-lg bg-white transition focus-within:border-brand-olive focus-within:ring-2 focus-within:ring-brand-olive/30">
             <PhoneInput
@@ -171,36 +157,30 @@ export default function ReferrerForm() {
               countryCallingCodeEditable={false}
               value={phone}
               onChange={setPhone}
-              placeholder="999 489 0828"
+              placeholder={t.referrerForm.placeholderPhone}
               autoComplete="tel"
-              numberInputProps={{ 'aria-label': 'Teléfono', required: true }}
+              numberInputProps={{ 'aria-label': t.referrerForm.fieldPhone, required: true }}
             />
           </div>
         </label>
 
         <label className="block">
-          <span className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1">
-            Email
-          </span>
+          <span className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1">{t.referrerForm.fieldEmail}</span>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full px-4 py-3 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-olive/40 focus:border-brand-olive transition"
-            placeholder="tu@email.com"
+            placeholder={t.referrerForm.placeholderEmail}
             autoComplete="email"
             required
           />
-          <span className="block text-[11px] text-stone-500 mt-1">
-            Aquí enviaremos tu link de referido.
-          </span>
+          <span className="block text-[11px] text-stone-500 mt-1">{t.referrerForm.emailFootnote}</span>
         </label>
       </div>
 
       {errorMessage && (
-        <p className="mt-3 text-sm text-red-600" role="alert">
-          {errorMessage}
-        </p>
+        <p className="mt-3 text-sm text-red-600" role="alert">{errorMessage}</p>
       )}
 
       <button
@@ -211,16 +191,14 @@ export default function ReferrerForm() {
         {status === 'submitting' ? (
           <>
             <Loader2 className="w-4 h-4 animate-spin" />
-            Generando tu link...
+            {t.referrerForm.submitting}
           </>
         ) : (
-          'Quiero mi link de referido'
+          t.referrerForm.submitButton
         )}
       </button>
 
-      <p className="mt-3 text-[11px] text-stone-500 text-center leading-relaxed">
-        Al enviar aceptas recibir comunicaciones del programa de referidos Selvadentro.
-      </p>
+      <p className="mt-3 text-[11px] text-stone-500 text-center leading-relaxed">{t.referrerForm.consent}</p>
     </form>
   );
 }

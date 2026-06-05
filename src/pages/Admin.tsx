@@ -6,6 +6,8 @@ import {
 } from 'lucide-react';
 import { useAuth, signOut } from '../utils/auth';
 import { supabase } from '../utils/supabase';
+import { useLang } from '../i18n/useLang';
+import type { Translations } from '../i18n/translations';
 
 // ─── Types ────────────────────────────────────────────────────────────────
 
@@ -65,58 +67,42 @@ interface PendingCommissionRow {
   affiliate_ghl_contact_id: string | null;
 }
 
-// ─── GHL link helpers ─────────────────────────────────────────────────────
-// The GHL location ID is embedded in the inbound webhook URLs we already use.
 const GHL_LOCATION_ID = 'crN2IhAuOBAl7D8324yI';
 
 function ghlContactLink(ghl_contact_id: string | null | undefined, email: string): string {
   if (ghl_contact_id) {
     return `https://app.gohighlevel.com/v2/location/${GHL_LOCATION_ID}/contacts/detail/${ghl_contact_id}`;
   }
-  // Fallback: open GHL contacts list with the email pre-filled in the search box.
   return `https://app.gohighlevel.com/v2/location/${GHL_LOCATION_ID}/contacts/?search=${encodeURIComponent(email)}`;
 }
 
-function GhlLink({ contactId, email, label = 'GHL' }: { contactId: string | null | undefined; email: string; label?: string }) {
+function GhlLink({ contactId, email, t }: { contactId: string | null | undefined; email: string; t: Translations['admin'] }) {
   if (!email) return null;
   return (
     <a
       href={ghlContactLink(contactId, email)}
       target="_blank"
       rel="noopener noreferrer"
-      title={contactId ? 'Abrir contacto en GHL' : 'Buscar en GHL por email'}
+      title={contactId ? t.ghlLinkTitleHasId : t.ghlLinkTitleSearch}
       className="inline-flex items-center gap-1 text-xs text-brand-olive hover:text-brand-dark-green underline"
     >
-      <ExternalLink className="w-3 h-3" /> {label}
+      <ExternalLink className="w-3 h-3" /> {t.ghlLinkLabel}
     </a>
   );
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────
-
 const formatUSD = (n: number, currency = 'USD'): string =>
-  new Intl.NumberFormat('en-US', { style: 'currency', currency, maximumFractionDigits: 0 })
-    .format(n);
+  new Intl.NumberFormat('en-US', { style: 'currency', currency, maximumFractionDigits: 0 }).format(n);
 
-const relativeTime = (iso: string): string => {
+const relativeTime = (iso: string, t: Translations['admin']): string => {
   const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
-  if (days < 1) return 'hoy';
-  if (days === 1) return 'ayer';
-  if (days < 30) return `hace ${days} días`;
-  if (days < 365) return `hace ${Math.floor(days / 30)} meses`;
-  return `hace ${Math.floor(days / 365)} años`;
+  if (days < 1) return t.relTimeToday;
+  if (days === 1) return t.relTimeYesterday;
+  if (days < 30) return t.relTimeDays(days);
+  if (days < 365) return t.relTimeMonths(Math.floor(days / 30));
+  return t.relTimeYears(Math.floor(days / 365));
 };
 
-const STATUS_LABEL: Record<LeadRow['status'], string> = {
-  new: 'Nuevo',
-  contacted: 'Contactado',
-  qualified: 'Calificado',
-  zoom: 'Zoom',
-  tour: 'Tour',
-  opp: 'Cotización',
-  won: 'Cerrado',
-  lost: 'Perdido',
-};
 const STATUS_BG: Record<LeadRow['status'], string> = {
   new: 'bg-stone-100 text-stone-700 border-stone-200',
   contacted: 'bg-amber-50 text-amber-800 border-amber-200',
@@ -129,7 +115,18 @@ const STATUS_BG: Record<LeadRow['status'], string> = {
 };
 const STATUS_ORDER: LeadRow['status'][] = ['new', 'contacted', 'qualified', 'zoom', 'tour', 'opp', 'won', 'lost'];
 
-// ─── Inline UI bits ───────────────────────────────────────────────────────
+function statusLabel(s: LeadRow['status'], t: Translations['admin']): string {
+  switch (s) {
+    case 'new': return t.statusNew;
+    case 'contacted': return t.statusContacted;
+    case 'qualified': return t.statusQualified;
+    case 'zoom': return t.statusZoom;
+    case 'tour': return t.statusTour;
+    case 'opp': return t.statusOpp;
+    case 'won': return t.statusWon;
+    case 'lost': return t.statusLost;
+  }
+}
 
 function StatTile({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
@@ -153,14 +150,15 @@ function Section({ title, action, children }: { title: string; action?: React.Re
   );
 }
 
-// ─── Modal: Mark lead as won (with commission amount) ─────────────────────
+// ─── Modal: Mark lead as won ──────────────────────────────────────────────
 
 function MarkWonModal({
-  lead, onClose, onConfirm,
+  lead, onClose, onConfirm, t,
 }: {
   lead: LeadRow;
   onClose: () => void;
   onConfirm: (amount: number, currency: string, escrituraDate: string, notes: string) => Promise<void>;
+  t: Translations['admin'];
 }) {
   const [amount, setAmount] = useState('1500');
   const [currency, setCurrency] = useState('USD');
@@ -172,7 +170,7 @@ function MarkWonModal({
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     const n = parseFloat(amount);
-    if (!n || n <= 0) { setErr('Ingresa un monto válido.'); return; }
+    if (!n || n <= 0) { setErr(t.modalMarkWonInvalid); return; }
     setBusy(true); setErr(null);
     try { await onConfirm(n, currency, escrituraDate, notes); }
     catch (e2: unknown) {
@@ -186,14 +184,14 @@ function MarkWonModal({
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 sm:p-8">
         <div className="flex items-start justify-between mb-4">
           <div>
-            <h3 className="font-cardo text-2xl font-bold text-brand-dark-green">Marcar como cerrado</h3>
-            <p className="text-sm text-stone-600">{lead.first_name} {lead.last_name ?? ''} · referido por {lead.affiliate_name ?? '—'}</p>
+            <h3 className="font-cardo text-2xl font-bold text-brand-dark-green">{t.modalMarkWonTitle}</h3>
+            <p className="text-sm text-stone-600">{lead.first_name} {lead.last_name ?? ''} · {t.modalMarkWonRefBy} {lead.affiliate_name ?? '—'}</p>
           </div>
           <button onClick={onClose} className="text-stone-500 hover:text-stone-800"><X className="w-5 h-5" /></button>
         </div>
         <form onSubmit={submit} className="space-y-3">
           <label className="block">
-            <span className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1">Comisión a pagar</span>
+            <span className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1">{t.modalMarkWonAmount}</span>
             <div className="flex gap-2">
               <input type="number" min="0" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)}
                 className="flex-1 px-4 py-3 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-olive/40" />
@@ -204,22 +202,22 @@ function MarkWonModal({
             </div>
           </label>
           <label className="block">
-            <span className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1">Fecha de escritura</span>
+            <span className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1">{t.modalMarkWonDate}</span>
             <input type="date" value={escrituraDate} onChange={(e) => setEscrituraDate(e.target.value)}
               className="w-full px-4 py-3 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-olive/40" />
           </label>
           <label className="block">
-            <span className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1">Notas (opcional)</span>
+            <span className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1">{t.modalMarkWonNotes}</span>
             <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2}
               className="w-full px-4 py-3 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-olive/40" />
           </label>
           {err && <p className="text-sm text-red-600">{err}</p>}
           <div className="flex gap-2 pt-2">
-            <button type="button" onClick={onClose} className="flex-1 px-4 py-3 border border-stone-300 rounded-lg font-medium text-stone-700 hover:bg-stone-50">Cancelar</button>
+            <button type="button" onClick={onClose} className="flex-1 px-4 py-3 border border-stone-300 rounded-lg font-medium text-stone-700 hover:bg-stone-50">Cancel</button>
             <button type="submit" disabled={busy}
               className="flex-1 px-4 py-3 bg-brand-olive text-white rounded-lg font-semibold hover:bg-brand-dark-green disabled:opacity-60 flex items-center justify-center gap-2">
               {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-              Confirmar
+              {t.modalMarkWonConfirm}
             </button>
           </div>
         </form>
@@ -231,11 +229,12 @@ function MarkWonModal({
 // ─── Modal: Edit affiliate ────────────────────────────────────────────────
 
 function EditAffiliateModal({
-  affiliate, onClose, onConfirm,
+  affiliate, onClose, onConfirm, t,
 }: {
   affiliate: LeaderboardRow;
   onClose: () => void;
   onConfirm: (data: { first_name: string; last_name: string; email: string; phone: string; commission_rate: number | null; status: string }) => Promise<void>;
+  t: Translations['admin'];
 }) {
   const [first_name, setFirstName] = useState(affiliate.first_name);
   const [last_name, setLastName] = useState(affiliate.last_name ?? '');
@@ -265,7 +264,7 @@ function EditAffiliateModal({
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 sm:p-8">
         <div className="flex items-start justify-between mb-4">
           <div>
-            <h3 className="font-cardo text-2xl font-bold text-brand-dark-green">Editar afiliado</h3>
+            <h3 className="font-cardo text-2xl font-bold text-brand-dark-green">{t.modalEditTitle}</h3>
             <p className="text-xs text-stone-500 font-mono">{affiliate.code}</p>
           </div>
           <button onClick={onClose} className="text-stone-500 hover:text-stone-800"><X className="w-5 h-5" /></button>
@@ -273,40 +272,40 @@ function EditAffiliateModal({
         <form onSubmit={submit} className="space-y-3">
           <div className="grid grid-cols-2 gap-2">
             <label className="block">
-              <span className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1">Nombre</span>
+              <span className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1">{t.modalEditFirstName}</span>
               <input value={first_name} onChange={(e) => setFirstName(e.target.value)} className="w-full px-3 py-2.5 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-olive/40" />
             </label>
             <label className="block">
-              <span className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1">Apellido</span>
+              <span className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1">{t.modalEditLastName}</span>
               <input value={last_name} onChange={(e) => setLastName(e.target.value)} className="w-full px-3 py-2.5 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-olive/40" />
             </label>
           </div>
           <label className="block">
-            <span className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1">Email</span>
+            <span className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1">{t.modalEditEmail}</span>
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-3 py-2.5 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-olive/40" />
           </label>
           <label className="block">
-            <span className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1">Teléfono</span>
+            <span className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1">{t.modalEditPhone}</span>
             <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full px-3 py-2.5 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-olive/40" />
           </label>
           <div className="grid grid-cols-2 gap-2">
             <label className="block">
-              <span className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1">Comisión (%)</span>
-              <input type="number" min="0" max="100" step="0.5" value={commission_rate} onChange={(e) => setRate(e.target.value)} placeholder="default" className="w-full px-3 py-2.5 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-olive/40" />
+              <span className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1">{t.modalEditRate}</span>
+              <input type="number" min="0" max="100" step="0.5" value={commission_rate} onChange={(e) => setRate(e.target.value)} placeholder={t.modalEditRatePh} className="w-full px-3 py-2.5 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-olive/40" />
             </label>
             <label className="block">
-              <span className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1">Estado</span>
+              <span className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1">{t.modalEditStatus}</span>
               <select value={status} onChange={(e) => setStatus(e.target.value as 'active' | 'paused')} className="w-full px-3 py-2.5 border border-stone-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-brand-olive/40">
-                <option value="active">Activo</option><option value="paused">Pausado</option>
+                <option value="active">{t.affActive}</option><option value="paused">{t.affPaused}</option>
               </select>
             </label>
           </div>
           {err && <p className="text-sm text-red-600">{err}</p>}
           <div className="flex gap-2 pt-2">
-            <button type="button" onClick={onClose} className="flex-1 px-4 py-3 border border-stone-300 rounded-lg font-medium text-stone-700 hover:bg-stone-50">Cancelar</button>
+            <button type="button" onClick={onClose} className="flex-1 px-4 py-3 border border-stone-300 rounded-lg font-medium text-stone-700 hover:bg-stone-50">Cancel</button>
             <button type="submit" disabled={busy} className="flex-1 px-4 py-3 bg-brand-olive text-white rounded-lg font-semibold hover:bg-brand-dark-green disabled:opacity-60 flex items-center justify-center gap-2">
               {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-              Guardar
+              {t.confirm}
             </button>
           </div>
         </form>
@@ -319,6 +318,8 @@ function EditAffiliateModal({
 
 export default function Admin() {
   const { user } = useAuth();
+  const { lang, t, otherLang, swapLangUrl } = useLang();
+  const ta = t.admin;
   const [overview, setOverview] = useState<Overview | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardRow[]>([]);
   const [leads, setLeads] = useState<LeadRow[]>([]);
@@ -328,6 +329,10 @@ export default function Admin() {
   const [search, setSearch] = useState('');
   const [editAffiliate, setEditAffiliate] = useState<LeaderboardRow | null>(null);
   const [markWonLead, setMarkWonLead] = useState<LeadRow | null>(null);
+
+  useEffect(() => {
+    document.title = ta.docTitle;
+  }, [ta]);
 
   const fetchAll = useCallback(async () => {
     setLoading(true); setError(null);
@@ -356,10 +361,8 @@ export default function Admin() {
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
-  // ─ Actions ──────────────────────────────────────────────────────────────
-
   const markPaid = async (commissionId: string) => {
-    if (!confirm('¿Confirmar que esta comisión fue pagada?')) return;
+    if (!confirm(ta.modalConfirmPaid)) return;
     const { error } = await supabase.rpc('admin_mark_commission_paid', {
       p_commission_id: commissionId, p_paid_date: null,
     });
@@ -368,7 +371,7 @@ export default function Admin() {
   };
 
   const changeLeadStatus = async (leadId: string, newStatus: string) => {
-    if (newStatus === 'won') return; // handled by modal
+    if (newStatus === 'won') return;
     const { error } = await supabase.rpc('admin_update_lead_status', {
       p_lead_id: leadId, p_status: newStatus,
     });
@@ -404,16 +407,10 @@ export default function Admin() {
     fetchAll();
   };
 
-  // ─ Filtered views ───────────────────────────────────────────────────────
-
   const q = search.trim().toLowerCase();
   const filteredLb = q
-    ? leaderboard.filter((r) =>
-        `${r.first_name} ${r.last_name ?? ''} ${r.email} ${r.code}`.toLowerCase().includes(q),
-      )
+    ? leaderboard.filter((r) => `${r.first_name} ${r.last_name ?? ''} ${r.email} ${r.code}`.toLowerCase().includes(q))
     : leaderboard;
-
-  // ─ Render ───────────────────────────────────────────────────────────────
 
   return (
     <div className="min-h-screen bg-[#ECE5D8] font-lexend">
@@ -427,22 +424,29 @@ export default function Admin() {
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
             <a
-              href="/dashboard"
+              href={swapLangUrl()}
+              className="text-[11px] font-semibold tracking-widest text-white/70 hover:text-white px-2 transition"
+              title={`Switch to ${otherLang.toUpperCase()}`}
+            >
+              {lang.toUpperCase()} · <span className="text-brand-copper underline">{otherLang.toUpperCase()}</span>
+            </a>
+            <a
+              href={`/${lang}/dashboard`}
               className="flex items-center gap-1.5 text-xs sm:text-sm text-white/85 hover:text-white px-3 py-1.5 rounded-full hover:bg-white/10 transition"
-              title="Ver mi dashboard de afiliado"
+              title={ta.myDashboard}
             >
               <Users className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Mi dashboard</span>
-              <span className="sm:hidden">Mío</span>
+              <span className="hidden sm:inline">{ta.myDashboard}</span>
+              <span className="sm:hidden">{ta.myDashboardShort}</span>
             </a>
             <button onClick={fetchAll} disabled={loading}
               className="flex items-center gap-1.5 text-xs sm:text-sm text-white/85 hover:text-white px-3 py-1.5 rounded-full hover:bg-white/10 transition disabled:opacity-50">
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-              <span className="hidden sm:inline">Actualizar</span>
+              <span className="hidden sm:inline">{t.common.refresh}</span>
             </button>
             <span className="text-xs sm:text-sm text-white/75 hidden lg:inline truncate max-w-[180px]">{user?.email}</span>
             <button onClick={() => signOut()} className="flex items-center gap-1.5 text-xs sm:text-sm text-white/85 hover:text-white px-3 py-1.5 rounded-full hover:bg-white/10 transition">
-              <LogOut className="w-3.5 h-3.5" /><span className="hidden sm:inline">Salir</span>
+              <LogOut className="w-3.5 h-3.5" /><span className="hidden sm:inline">{t.common.signOutShort}</span>
             </button>
           </div>
         </div>
@@ -450,16 +454,14 @@ export default function Admin() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-6 sm:py-10">
         <div className="mb-6">
-          <h1 className="font-cardo text-3xl sm:text-4xl font-bold text-brand-dark-green leading-tight mb-1">
-            Panel de administración
-          </h1>
-          <p className="text-stone-600 text-sm">Programa de Referidos · vista completa</p>
+          <h1 className="font-cardo text-3xl sm:text-4xl font-bold text-brand-dark-green leading-tight mb-1">{ta.title}</h1>
+          <p className="text-stone-600 text-sm">{ta.subtitle}</p>
         </div>
 
         {loading && !overview && (
           <div className="bg-white rounded-2xl p-12 border border-stone-100 shadow-sm flex flex-col items-center text-center">
             <Loader2 className="w-8 h-8 text-brand-olive animate-spin mb-3" />
-            <p className="text-sm text-stone-600">Cargando datos del programa...</p>
+            <p className="text-sm text-stone-600">{ta.loadingProgram}</p>
           </div>
         )}
 
@@ -468,7 +470,7 @@ export default function Admin() {
             <div className="flex items-start gap-4">
               <AlertCircle className="w-6 h-6 text-red-500 shrink-0 mt-0.5" />
               <div className="flex-1">
-                <h2 className="font-cardo text-xl font-bold text-brand-dark-green mb-2">Error</h2>
+                <h2 className="font-cardo text-xl font-bold text-brand-dark-green mb-2">{ta.errorTitle}</h2>
                 <pre className="text-xs bg-stone-50 border border-stone-200 rounded-lg p-3 overflow-x-auto text-red-700 whitespace-pre-wrap">{error}</pre>
               </div>
             </div>
@@ -477,29 +479,27 @@ export default function Admin() {
 
         {overview && (
           <>
-            {/* OVERVIEW STATS */}
             <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 mb-6">
-              <StatTile label="Afiliados" value={overview.total_affiliates} sub={`${overview.active_affiliates} activos`} />
-              <StatTile label="Clics totales" value={overview.total_clicks} />
-              <StatTile label="Leads totales" value={overview.total_leads} sub={`${overview.total_won} cerrados`} />
-              <StatTile label="Por pagar" value={formatUSD(Number(overview.total_owed))} />
-              <StatTile label="Pagado" value={formatUSD(Number(overview.total_paid))} />
+              <StatTile label={ta.tileAffiliates} value={overview.total_affiliates} sub={ta.tileAffiliatesActive(overview.active_affiliates)} />
+              <StatTile label={ta.tileClicks} value={overview.total_clicks} />
+              <StatTile label={ta.tileLeads} value={overview.total_leads} sub={ta.tileLeadsWon(overview.total_won)} />
+              <StatTile label={ta.tileOwed} value={formatUSD(Number(overview.total_owed))} />
+              <StatTile label={ta.tilePaid} value={formatUSD(Number(overview.total_paid))} />
             </div>
 
-            {/* PENDING COMMISSIONS */}
-            <Section title={`Comisiones por pagar (${pendingCommissions.length})`}>
+            <Section title={ta.pendingTitle(pendingCommissions.length)}>
               {pendingCommissions.length === 0 ? (
-                <p className="text-sm text-stone-500 py-8 text-center">No hay comisiones pendientes.</p>
+                <p className="text-sm text-stone-500 py-8 text-center">{ta.pendingEmpty}</p>
               ) : (
                 <div className="overflow-x-auto -mx-4 sm:-mx-6">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="text-left text-[11px] font-semibold uppercase tracking-widest text-stone-500 border-b border-stone-100">
-                        <th className="px-4 sm:px-6 py-3">Afiliado</th>
-                        <th className="px-4 py-3">Lead</th>
-                        <th className="px-4 py-3 text-right">Monto</th>
-                        <th className="px-4 py-3">Escritura</th>
-                        <th className="px-4 sm:px-6 py-3 text-right">Acción</th>
+                        <th className="px-4 sm:px-6 py-3">{ta.pendingColAffiliate}</th>
+                        <th className="px-4 py-3">{ta.pendingColLead}</th>
+                        <th className="px-4 py-3 text-right">{ta.pendingColAmount}</th>
+                        <th className="px-4 py-3">{ta.pendingColEscritura}</th>
+                        <th className="px-4 sm:px-6 py-3 text-right">{ta.pendingColAction}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -509,18 +509,16 @@ export default function Admin() {
                             <div className="font-medium text-brand-dark-green">{c.affiliate_name}</div>
                             <div className="text-xs text-stone-500 flex items-center gap-2">
                               <span>{c.affiliate_email}</span>
-                              <GhlLink contactId={c.affiliate_ghl_contact_id} email={c.affiliate_email} />
+                              <GhlLink contactId={c.affiliate_ghl_contact_id} email={c.affiliate_email} t={ta} />
                             </div>
                           </td>
                           <td className="px-4 py-3 text-stone-700">{c.lead_name}</td>
-                          <td className="px-4 py-3 text-right font-mono font-semibold text-brand-dark-green">
-                            {formatUSD(Number(c.amount), c.currency)}
-                          </td>
+                          <td className="px-4 py-3 text-right font-mono font-semibold text-brand-dark-green">{formatUSD(Number(c.amount), c.currency)}</td>
                           <td className="px-4 py-3 text-stone-500 text-xs">{c.escritura_date ?? '—'}</td>
                           <td className="px-4 sm:px-6 py-3 text-right">
                             <button onClick={() => markPaid(c.id)}
                               className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-100 text-emerald-800 hover:bg-emerald-200 rounded-full text-xs font-semibold transition">
-                              <DollarSign className="w-3 h-3" /> Marcar pagado
+                              <DollarSign className="w-3 h-3" /> {ta.pendingMarkPaid}
                             </button>
                           </td>
                         </tr>
@@ -531,20 +529,19 @@ export default function Admin() {
               )}
             </Section>
 
-            {/* LEADS PIPELINE */}
-            <Section title={`Leads (${leads.length})`}>
+            <Section title={ta.leadsTitle(leads.length)}>
               {leads.length === 0 ? (
-                <p className="text-sm text-stone-500 py-8 text-center">Sin leads todavía.</p>
+                <p className="text-sm text-stone-500 py-8 text-center">{ta.leadsEmpty}</p>
               ) : (
                 <div className="overflow-x-auto -mx-4 sm:-mx-6">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="text-left text-[11px] font-semibold uppercase tracking-widest text-stone-500 border-b border-stone-100">
-                        <th className="px-4 sm:px-6 py-3">Lead</th>
-                        <th className="px-4 py-3">Referido por</th>
-                        <th className="px-4 py-3">Fecha</th>
-                        <th className="px-4 py-3">Estado</th>
-                        <th className="px-4 sm:px-6 py-3 text-right">Acción</th>
+                        <th className="px-4 sm:px-6 py-3">{ta.leadsColLead}</th>
+                        <th className="px-4 py-3">{ta.leadsColAffiliate}</th>
+                        <th className="px-4 py-3">{ta.leadsColDate}</th>
+                        <th className="px-4 py-3">{ta.leadsColStatus}</th>
+                        <th className="px-4 sm:px-6 py-3 text-right">{ta.leadsColAction}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -553,7 +550,7 @@ export default function Admin() {
                           <td className="px-4 sm:px-6 py-3">
                             <div className="font-medium text-brand-dark-green flex items-center gap-2">
                               {l.first_name} {l.last_name ?? ''}
-                              <GhlLink contactId={l.ghl_contact_id} email={l.email} />
+                              <GhlLink contactId={l.ghl_contact_id} email={l.email} t={ta} />
                             </div>
                             <div className="text-xs text-stone-500">{l.email}</div>
                           </td>
@@ -562,14 +559,14 @@ export default function Admin() {
                               <div className="flex items-center gap-2">
                                 <span>{l.affiliate_name}</span>
                                 {l.affiliate_email && (
-                                  <GhlLink contactId={l.affiliate_ghl_contact_id} email={l.affiliate_email} />
+                                  <GhlLink contactId={l.affiliate_ghl_contact_id} email={l.affiliate_email} t={ta} />
                                 )}
                               </div>
                             ) : (
-                              <em className="text-stone-400">directo</em>
+                              <em className="text-stone-400">{ta.leadsDirect}</em>
                             )}
                           </td>
-                          <td className="px-4 py-3 text-stone-500 text-xs whitespace-nowrap">{relativeTime(l.created_at)}</td>
+                          <td className="px-4 py-3 text-stone-500 text-xs whitespace-nowrap">{relativeTime(l.created_at, ta)}</td>
                           <td className="px-4 py-3">
                             <div className="relative inline-block">
                               <select
@@ -581,7 +578,7 @@ export default function Admin() {
                                 className={`appearance-none pr-7 pl-3 py-1 rounded-full text-xs font-semibold border cursor-pointer ${STATUS_BG[l.status]}`}
                               >
                                 {STATUS_ORDER.map((s) => (
-                                  <option key={s} value={s}>{STATUS_LABEL[s]}</option>
+                                  <option key={s} value={s}>{statusLabel(s, ta)}</option>
                                 ))}
                               </select>
                               <ChevronDown className="w-3 h-3 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none opacity-60" />
@@ -589,9 +586,8 @@ export default function Admin() {
                           </td>
                           <td className="px-4 sm:px-6 py-3 text-right">
                             {l.status !== 'won' && l.affiliate_code && (
-                              <button onClick={() => setMarkWonLead(l)}
-                                className="text-xs text-brand-olive hover:text-brand-dark-green underline">
-                                Marcar cerrado
+                              <button onClick={() => setMarkWonLead(l)} className="text-xs text-brand-olive hover:text-brand-dark-green underline">
+                                {ta.leadsMarkWon}
                               </button>
                             )}
                           </td>
@@ -603,35 +599,30 @@ export default function Admin() {
               )}
             </Section>
 
-            {/* AFFILIATE LEADERBOARD */}
             <Section
-              title={`Afiliados (${leaderboard.length})`}
+              title={ta.affiliatesTitle(leaderboard.length)}
               action={
                 <div className="relative">
                   <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
-                  <input
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Buscar..."
-                    className="pl-9 pr-3 py-2 border border-stone-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-brand-olive/40 w-44"
-                  />
+                  <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={ta.affiliatesSearch}
+                    className="pl-9 pr-3 py-2 border border-stone-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-brand-olive/40 w-44" />
                 </div>
               }
             >
               {filteredLb.length === 0 ? (
-                <p className="text-sm text-stone-500 py-8 text-center">Sin afiliados que mostrar.</p>
+                <p className="text-sm text-stone-500 py-8 text-center">{ta.affiliatesEmpty}</p>
               ) : (
                 <div className="overflow-x-auto -mx-4 sm:-mx-6">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="text-left text-[11px] font-semibold uppercase tracking-widest text-stone-500 border-b border-stone-100">
-                        <th className="px-4 sm:px-6 py-3">Afiliado</th>
-                        <th className="px-4 py-3 text-right">Clics</th>
-                        <th className="px-4 py-3 text-right">Leads</th>
-                        <th className="px-4 py-3 text-right">Cerrados</th>
-                        <th className="px-4 py-3 text-right">Por pagar</th>
-                        <th className="px-4 py-3">Estado</th>
-                        <th className="px-4 sm:px-6 py-3 text-right">Editar</th>
+                        <th className="px-4 sm:px-6 py-3">{ta.affColAffiliate}</th>
+                        <th className="px-4 py-3 text-right">{ta.affColClicks}</th>
+                        <th className="px-4 py-3 text-right">{ta.affColLeads}</th>
+                        <th className="px-4 py-3 text-right">{ta.affColWon}</th>
+                        <th className="px-4 py-3 text-right">{ta.affColOwed}</th>
+                        <th className="px-4 py-3">{ta.affColStatus}</th>
+                        <th className="px-4 sm:px-6 py-3 text-right">{ta.affColAction}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -640,7 +631,7 @@ export default function Admin() {
                           <td className="px-4 sm:px-6 py-3">
                             <div className="font-medium text-brand-dark-green flex items-center gap-2">
                               {a.first_name} {a.last_name ?? ''}
-                              <GhlLink contactId={a.ghl_contact_id} email={a.email} />
+                              <GhlLink contactId={a.ghl_contact_id} email={a.email} t={ta} />
                             </div>
                             <div className="text-xs text-stone-500 font-mono">{a.code}</div>
                             <div className="text-xs text-stone-500">{a.email}</div>
@@ -648,20 +639,17 @@ export default function Admin() {
                           <td className="px-4 py-3 text-right text-stone-700 font-mono">{a.click_count}</td>
                           <td className="px-4 py-3 text-right text-stone-700 font-mono">{a.lead_count}</td>
                           <td className="px-4 py-3 text-right font-mono font-semibold text-emerald-700">{a.won_count}</td>
-                          <td className="px-4 py-3 text-right font-mono font-semibold text-brand-dark-green">
-                            {formatUSD(Number(a.commissions_owed))}
-                          </td>
+                          <td className="px-4 py-3 text-right font-mono font-semibold text-brand-dark-green">{formatUSD(Number(a.commissions_owed))}</td>
                           <td className="px-4 py-3">
                             <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${
                               a.status === 'active' ? 'bg-emerald-100 text-emerald-800' : 'bg-stone-200 text-stone-600'
                             }`}>
-                              {a.status === 'active' ? 'Activo' : 'Pausado'}
+                              {a.status === 'active' ? ta.affActive : ta.affPaused}
                             </span>
                           </td>
                           <td className="px-4 sm:px-6 py-3 text-right">
-                            <button onClick={() => setEditAffiliate(a)}
-                              className="inline-flex items-center gap-1 text-brand-olive hover:text-brand-dark-green text-xs">
-                              <Edit2 className="w-3 h-3" /> Editar
+                            <button onClick={() => setEditAffiliate(a)} className="inline-flex items-center gap-1 text-brand-olive hover:text-brand-dark-green text-xs">
+                              <Edit2 className="w-3 h-3" /> {ta.affEdit}
                             </button>
                           </td>
                         </tr>
@@ -679,9 +667,8 @@ export default function Admin() {
         <MarkWonModal
           lead={markWonLead}
           onClose={() => setMarkWonLead(null)}
-          onConfirm={(amount, currency, escrituraDate, notes) =>
-            confirmMarkWon(markWonLead, amount, currency, escrituraDate, notes)
-          }
+          onConfirm={(amount, currency, escrituraDate, notes) => confirmMarkWon(markWonLead, amount, currency, escrituraDate, notes)}
+          t={ta}
         />
       )}
       {editAffiliate && (
@@ -689,10 +676,10 @@ export default function Admin() {
           affiliate={editAffiliate}
           onClose={() => setEditAffiliate(null)}
           onConfirm={(data) => confirmEditAffiliate(editAffiliate, data)}
+          t={ta}
         />
       )}
 
-      {/* Suppress unused-import warnings for icons used conditionally */}
       <span className="hidden">
         <Users /> <MousePointerClick /> <Trophy /> <CircleDollarSign /> <Briefcase />
       </span>

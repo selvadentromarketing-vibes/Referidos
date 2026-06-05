@@ -4,6 +4,7 @@ import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import type { Value as PhoneValue } from 'react-phone-number-input';
 import { submitReferralLead } from '../utils/webhook';
 import { captureTrackingParams } from '../utils/tracking';
+import { useLang } from '../i18n/useLang';
 
 const splitName = (full: string): { first: string; last: string } => {
   const trimmed = full.trim().replace(/\s+/g, ' ');
@@ -14,6 +15,7 @@ const splitName = (full: string): { first: string; last: string } => {
 };
 
 export default function ReferralForm() {
+  const { t } = useLang();
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState<PhoneValue | undefined>(undefined);
   const [email, setEmail] = useState('');
@@ -25,11 +27,11 @@ export default function ReferralForm() {
     setErrorMessage(null);
 
     if (!fullName.trim() || !phone || !email.trim()) {
-      setErrorMessage('Por favor completa todos los campos.');
+      setErrorMessage(t.referralForm.errorMissing);
       return;
     }
     if (!isValidPhoneNumber(phone)) {
-      setErrorMessage('Ingresa un teléfono válido (incluye lada).');
+      setErrorMessage(t.referralForm.errorPhone);
       return;
     }
 
@@ -45,9 +47,7 @@ export default function ReferralForm() {
       setStatus('success');
     } else {
       setStatus('error');
-      setErrorMessage(
-        'No pudimos procesar tu solicitud. Intenta de nuevo o llámanos al +52 999 489 0828.',
-      );
+      setErrorMessage(t.referralForm.errorSubmit);
     }
   };
 
@@ -55,12 +55,8 @@ export default function ReferralForm() {
     return (
       <div className="w-full max-w-md mx-auto bg-white rounded-2xl p-8 shadow-2xl text-center border border-stone-100">
         <CheckCircle2 className="w-14 h-14 text-brand-olive mx-auto mb-4" />
-        <h3 className="font-cardo text-2xl font-bold text-brand-dark-green mb-2">
-          ¡Listo!
-        </h3>
-        <p className="text-stone-700 leading-relaxed">
-          Tu solicitud se envió. Un asesor de Selvadentro te contactará en menos de 24 horas con disponibilidad y precios de Fase 1.
-        </p>
+        <h3 className="font-cardo text-2xl font-bold text-brand-dark-green mb-2">{t.referralForm.successTitle}</h3>
+        <p className="text-stone-700 leading-relaxed">{t.referralForm.successBody}</p>
       </div>
     );
   }
@@ -71,24 +67,18 @@ export default function ReferralForm() {
       className="w-full max-w-md mx-auto bg-white rounded-2xl p-6 sm:p-8 shadow-2xl border border-stone-100"
       noValidate
     >
-      <h3 className="font-cardo text-2xl sm:text-3xl font-bold text-brand-dark-green mb-1 leading-tight">
-        Conocer disponibilidad
-      </h3>
-      <p className="text-sm text-stone-600 mb-5">
-        Te llamamos en menos de 24 horas con precios y plan de pagos.
-      </p>
+      <h3 className="font-cardo text-2xl sm:text-3xl font-bold text-brand-dark-green mb-1 leading-tight">{t.referralForm.title}</h3>
+      <p className="text-sm text-stone-600 mb-5">{t.referralForm.subtitle}</p>
 
       <div className="space-y-3">
         <label className="block">
-          <span className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1">
-            Nombre completo
-          </span>
+          <span className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1">{t.referralForm.fieldName}</span>
           <input
             type="text"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             className="w-full px-4 py-3 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-olive/40 focus:border-brand-olive transition"
-            placeholder="Tu nombre"
+            placeholder={t.referralForm.placeholderName}
             autoComplete="name"
             required
           />
@@ -96,7 +86,7 @@ export default function ReferralForm() {
 
         <label className="block">
           <span className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1">
-            Teléfono <span className="text-brand-copper">*</span>
+            {t.referralForm.fieldPhone} <span className="text-brand-copper">*</span>
           </span>
           <div className="phone-input-shell px-4 py-3 border border-stone-300 rounded-lg bg-white transition focus-within:border-brand-olive focus-within:ring-2 focus-within:ring-brand-olive/30">
             <PhoneInput
@@ -105,23 +95,21 @@ export default function ReferralForm() {
               countryCallingCodeEditable={false}
               value={phone}
               onChange={setPhone}
-              placeholder="999 489 0828"
+              placeholder={t.referralForm.placeholderPhone}
               autoComplete="tel"
-              numberInputProps={{ 'aria-label': 'Teléfono', required: true }}
+              numberInputProps={{ 'aria-label': t.referralForm.fieldPhone, required: true }}
             />
           </div>
         </label>
 
         <label className="block">
-          <span className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1">
-            Email
-          </span>
+          <span className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1">{t.referralForm.fieldEmail}</span>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full px-4 py-3 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-olive/40 focus:border-brand-olive transition"
-            placeholder="tu@email.com"
+            placeholder={t.referralForm.placeholderEmail}
             autoComplete="email"
             required
           />
@@ -129,9 +117,7 @@ export default function ReferralForm() {
       </div>
 
       {errorMessage && (
-        <p className="mt-3 text-sm text-red-600" role="alert">
-          {errorMessage}
-        </p>
+        <p className="mt-3 text-sm text-red-600" role="alert">{errorMessage}</p>
       )}
 
       <button
@@ -142,16 +128,14 @@ export default function ReferralForm() {
         {status === 'submitting' ? (
           <>
             <Loader2 className="w-4 h-4 animate-spin" />
-            Enviando...
+            {t.referralForm.submitting}
           </>
         ) : (
-          'Ver disponibilidad y precios'
+          t.referralForm.submitButton
         )}
       </button>
 
-      <p className="mt-3 text-[11px] text-stone-500 text-center leading-relaxed">
-        Al enviar aceptas que un asesor de Selvadentro te contacte.
-      </p>
+      <p className="mt-3 text-[11px] text-stone-500 text-center leading-relaxed">{t.referralForm.consent}</p>
     </form>
   );
 }

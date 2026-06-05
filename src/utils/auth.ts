@@ -81,9 +81,13 @@ export function useAuth(): AuthState {
  *
  * Pass shouldRedirectToAdmin so we can route admins → /admin and affiliates → /dashboard.
  */
+/**
+ * Caller-supplied path should already include the lang prefix
+ * (e.g. "/en/dashboard" or "/es/admin").
+ */
 export async function sendMagicLink(
   email: string,
-  redirectPath: string = '/dashboard',
+  redirectPath: string = '/es/dashboard',
 ): Promise<{ success: boolean; error?: string }> {
   const redirectTo = `${window.location.origin}${redirectPath}`;
   const { error } = await supabase.auth.signInWithOtp({

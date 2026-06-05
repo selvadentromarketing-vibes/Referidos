@@ -1,7 +1,8 @@
 import { ReactNode } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '../utils/auth';
+import { DEFAULT_LANG, LANGS, type Lang } from '../i18n/translations';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -11,11 +12,17 @@ interface ProtectedRouteProps {
 
 /**
  * Wraps a route so it requires an authenticated session.
- * Loading state shows a spinner; unauthenticated users go to /login;
- * non-admins trying to access admin-only routes go to /dashboard.
+ * Loading state shows a spinner; unauthenticated users go to /:lang/login;
+ * non-admins trying to access admin-only routes go to /:lang/dashboard.
+ *
+ * The :lang param is read from the URL so redirects keep the user in the
+ * language they were browsing in.
  */
 export default function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
   const { user, loading, isAdmin } = useAuth();
+  const params = useParams<{ lang?: string }>();
+  const raw = (params.lang ?? '').toLowerCase();
+  const lang: Lang = (LANGS as readonly string[]).includes(raw) ? (raw as Lang) : DEFAULT_LANG;
 
   if (loading) {
     return (
@@ -26,11 +33,11 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to={`/${lang}/login`} replace />;
   }
 
   if (requireAdmin && !isAdmin) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to={`/${lang}/dashboard`} replace />;
   }
 
   return <>{children}</>;
