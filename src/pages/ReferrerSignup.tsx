@@ -28,7 +28,7 @@ export default function ReferrerSignup() {
       <header className="sticky top-0 z-30 bg-brand-dark-green/95 backdrop-blur-sm border-b border-white/10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-3 flex items-center justify-between gap-4">
           <a href={`/${lang}`} aria-label="Selvadentro" className="shrink-0">
-            <img src="/logo-selvandentro_tulum.webp" alt="Selvadentro Tulum" className="h-8 sm:h-9 w-auto" />
+            <img src="/logo-selvandentro_tulum.webp" alt="Selvadentro Tulum" className="h-9 sm:h-11 w-auto" />
           </a>
           <div className="flex items-center gap-2 sm:gap-3">
             <a
@@ -63,7 +63,7 @@ export default function ReferrerSignup() {
         />
         <div className="relative max-w-3xl mx-auto">
           <div className="mb-6 flex flex-col items-center">
-            <img src="/logo-selvandentro_tulum.webp" alt="Selvadentro" className="h-14 sm:h-16 w-auto mb-1" />
+            <img src="/logo-selvandentro_tulum.webp" alt="Selvadentro" className="h-20 sm:h-24 w-auto mb-1" />
             <span className="font-cardo italic text-white/70 text-xs sm:text-sm tracking-wide">{t.common.selvadentroTagline}</span>
           </div>
 
@@ -282,7 +282,7 @@ export default function ReferrerSignup() {
       {/* 7. FOOTER */}
       <footer className="bg-brand-dark-green text-white text-center py-14 px-4 sm:px-6">
         <div className="max-w-2xl mx-auto">
-          <img src="/logo-selvandentro_tulum.webp" alt="Selvadentro" className="h-9 w-auto mx-auto mb-5 opacity-90" />
+          <img src="/logo-selvandentro_tulum.webp" alt="Selvadentro" className="h-12 w-auto mx-auto mb-5" />
           <h3 className="font-cardo italic text-white text-xl sm:text-2xl mb-3">{t.referrerSignup.footerDoubt}</h3>
           <p className="text-sm text-white/80 leading-relaxed mb-5">
             {t.referrerSignup.footerHelp}{' '}

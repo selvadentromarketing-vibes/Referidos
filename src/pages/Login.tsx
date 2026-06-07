@@ -77,8 +77,8 @@ export default function Login() {
       <main className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md">
           <div className="text-center mb-6">
-            <div className="inline-flex w-14 h-14 items-center justify-center bg-white rounded-full shadow-sm mb-4">
-              <img src="/logo-selvandentro_tulum.webp" alt="Selvadentro" className="w-10 h-10 object-contain" />
+            <div className="inline-flex items-center justify-center bg-brand-dark-green rounded-2xl shadow-sm mb-4 px-5 py-2.5">
+              <img src="/logo-selvandentro_tulum.webp" alt="Selvadentro" className="h-9 w-auto" />
             </div>
             <h1 className="font-cardo text-3xl sm:text-4xl font-bold text-brand-dark-green leading-tight mb-2">
               {t.login.title}
