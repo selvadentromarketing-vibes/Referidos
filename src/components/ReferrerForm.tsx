@@ -15,7 +15,7 @@ const splitName = (full: string): { first: string; last: string } => {
 };
 
 export default function ReferrerForm() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState<PhoneValue | undefined>(undefined);
   const [email, setEmail] = useState('');
@@ -43,6 +43,7 @@ export default function ReferrerForm() {
     const result = await submitReferrerSignup(
       { first_name: first, last_name: last, email: email.trim(), phone },
       tracking,
+      lang, // 'es' | 'en' → GHL maps to Español / Inglés
     );
 
     if (result.success && result.referral_link) {

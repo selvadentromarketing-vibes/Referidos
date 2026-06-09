@@ -18,6 +18,13 @@ export interface TrackingParams {
   utm_campaign?: string;
   utm_term?: string;
   utm_content?: string;
+  // Ad structure IDs (populated by {{ad.id}} / {{adset.id}} / {{campaign.id}}
+  // dynamic params on the Meta Ads URL template, or equivalents on Google.)
+  ad_id?: string;
+  adset_id?: string;
+  campaign_id?: string;
+  // Google search term ({keyword} dynamic param)
+  search_term?: string;
   // Referral / affiliate (any of these may appear, depending on GHL setup)
   ref?: string;
   referrer?: string;
@@ -27,6 +34,14 @@ export interface TrackingParams {
   landing_page: string;
   referrer_url?: string;
 }
+
+const pickFirst = (url: URLSearchParams, keys: string[]): string | undefined => {
+  for (const k of keys) {
+    const v = url.get(k);
+    if (v) return v;
+  }
+  return undefined;
+};
 
 export const captureTrackingParams = (): TrackingParams => {
   const url = new URLSearchParams(window.location.search);
@@ -41,6 +56,11 @@ export const captureTrackingParams = (): TrackingParams => {
     utm_campaign: url.get('utm_campaign') || undefined,
     utm_term: url.get('utm_term') || undefined,
     utm_content: url.get('utm_content') || undefined,
+    // Accept multiple aliases so the ads team has flexibility in URL templates.
+    ad_id: pickFirst(url, ['ad_id', 'ad_source_id', 'fb_ad_id']),
+    adset_id: pickFirst(url, ['adset_id', 'fb_adset_id']),
+    campaign_id: pickFirst(url, ['campaign_id', 'fb_campaign_id']),
+    search_term: pickFirst(url, ['search_term', 'keyword']),
     ref: url.get('ref') || undefined,
     referrer: url.get('referrer') || undefined,
     affiliate_id: url.get('affiliate_id') || undefined,

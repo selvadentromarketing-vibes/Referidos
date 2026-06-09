@@ -24,6 +24,16 @@ const REFERRAL_LEAD_WEBHOOK_URL =
 
 const REFERRAL_LINK_BASE = 'https://referidos.selvadentrotulum.com/invitacion';
 
+/** Page language → GHL dropdown value. Matches the GHL "Idioma" field exactly
+ *  (Spanish words throughout): Inglés / Español / Francés / Otro. */
+export type PageLang = 'es' | 'en' | 'fr' | 'other';
+const LANGUAGE_FOR_GHL: Record<PageLang, 'Inglés' | 'Español' | 'Francés' | 'Otro'> = {
+  es: 'Español',
+  en: 'Inglés',
+  fr: 'Francés',
+  other: 'Otro',
+};
+
 export interface ReferrerSignupData {
   first_name: string;
   last_name: string;
@@ -81,6 +91,7 @@ const fireLeadEvents = (eventLabel: string) => {
 export const submitReferrerSignup = async (
   data: ReferrerSignupData,
   tracking: TrackingParams,
+  lang: PageLang = 'es',
 ): Promise<SubmissionResult> => {
   // Step 1 — Insert into Supabase via RPC, receive the generated code back.
   const { data: rpcRows, error: rpcError } = await supabase.rpc('create_affiliate', {
@@ -121,7 +132,8 @@ export const submitReferrerSignup = async (
       name: `${data.first_name} ${data.last_name}`.trim(),
       email: data.email,
       phone: data.phone,
-      language: 'Spanish',
+      // GHL dropdown values — Spanish words throughout (Inglés / Español / Francés / Otro)
+      language: LANGUAGE_FOR_GHL[lang],
       form_type: 'referrer-signup',
       // Affiliate attribution from Supabase — GHL email template uses this:
       affiliate_code,
@@ -132,13 +144,21 @@ export const submitReferrerSignup = async (
       'contact.source': 'Referidos - Signup',
       landing_page: tracking.landing_page,
       referrer_url: tracking.referrer_url,
+      // UTM
       utm_source: tracking.utm_source,
       utm_medium: tracking.utm_medium,
       utm_campaign: tracking.utm_campaign,
       utm_term: tracking.utm_term,
       utm_content: tracking.utm_content,
+      // Click IDs
       gclid: tracking.gclid,
       fbclid: tracking.fbclid,
+      // Ad structure (FB {{ad.id}} / {{adset.id}} / {{campaign.id}}, or Google equivalents)
+      ad_id: tracking.ad_id,
+      ad_source_id: tracking.ad_id, // GHL field is "Ad Source ID" — duplicate so it maps regardless
+      adset_id: tracking.adset_id,
+      campaign_id: tracking.campaign_id,
+      search_term: tracking.search_term,
     };
     const response = await fetch(REFERRER_SIGNUP_WEBHOOK_URL, {
       method: 'POST',
@@ -165,6 +185,7 @@ export const submitReferrerSignup = async (
 export const submitReferralLead = async (
   data: ReferralLeadData,
   tracking: TrackingParams,
+  lang: PageLang = 'es',
 ): Promise<SubmissionResult> => {
   const referred_by: string | null =
     tracking.ref || tracking.referrer || tracking.affiliate_id || tracking.aff || null;
@@ -200,7 +221,8 @@ export const submitReferralLead = async (
       name: `${data.first_name} ${data.last_name}`.trim(),
       email: data.email,
       phone: data.phone,
-      language: 'Spanish',
+      // GHL dropdown values — Spanish words throughout (Inglés / Español / Francés / Otro)
+      language: LANGUAGE_FOR_GHL[lang],
       form_type: 'referral-lead',
       // Affiliate attribution — three fields for sales context.
       // The code is for lookup/joins, the name/email surface immediately on
@@ -215,13 +237,21 @@ export const submitReferralLead = async (
       'contact.ad_ctwa_clid': tracking.fbclid || tracking.gclid,
       landing_page: tracking.landing_page,
       referrer_url: tracking.referrer_url,
+      // UTM
       utm_source: tracking.utm_source,
       utm_medium: tracking.utm_medium,
       utm_campaign: tracking.utm_campaign,
       utm_term: tracking.utm_term,
       utm_content: tracking.utm_content,
+      // Click IDs
       gclid: tracking.gclid,
       fbclid: tracking.fbclid,
+      // Ad structure (FB {{ad.id}} / {{adset.id}} / {{campaign.id}}, or Google equivalents)
+      ad_id: tracking.ad_id,
+      ad_source_id: tracking.ad_id, // GHL field is "Ad Source ID" — duplicate so it maps regardless
+      adset_id: tracking.adset_id,
+      campaign_id: tracking.campaign_id,
+      search_term: tracking.search_term,
     };
     const response = await fetch(REFERRAL_LEAD_WEBHOOK_URL, {
       method: 'POST',
