@@ -172,7 +172,7 @@ export default function Dashboard() {
       <header className="bg-brand-dark-green text-white px-4 sm:px-6 lg:px-10 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
           <a href={`/${lang}`} aria-label="Selvadentro" className="shrink-0">
-            <img src="/logo-selvandentro_tulum.webp" alt="Selvadentro" className="h-9 sm:h-11 w-auto" />
+            <img src="/logo-selvandentro_tulum-cream.webp" alt="Selvadentro" className="h-9 sm:h-11 w-auto" />
           </a>
           <div className="flex items-center gap-2 sm:gap-4">
             <a
