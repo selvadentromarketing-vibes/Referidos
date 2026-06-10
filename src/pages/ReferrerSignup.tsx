@@ -63,8 +63,7 @@ export default function ReferrerSignup() {
         />
         <div className="relative max-w-3xl mx-auto">
           <div className="mb-6 flex flex-col items-center">
-            <img src="/logo-selvandentro_tulum-cream.webp" alt="Selvadentro" className="h-20 sm:h-24 w-auto mb-1" />
-            <span className="font-cardo italic text-white/70 text-xs sm:text-sm tracking-wide">{t.common.selvadentroTagline}</span>
+            <img src="/logo-selvandentro_tulum-cream.webp" alt="Selvadentro · tierra de cenotes" className="h-20 sm:h-24 w-auto" />
           </div>
 
           <div className="inline-block mb-6 sm:mb-8 px-5 py-1.5 border border-brand-copper/40 rounded-full">
