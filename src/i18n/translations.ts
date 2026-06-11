@@ -30,7 +30,7 @@ const es = {
     edit: 'Editar',
     contactEmail: 'info@selvadentrotulum.com',
     contactPhone: '+52 999 489 0828',
-    contactSupportEmail: 'd.comercial@selvadentrotulum.com',
+    contactSupportEmail: 'info@selvadentrotulum.com',
     program: 'Programa de Referidos',
     footerCommunity: 'Selvadentro · tierra de cenotes',
     footerCopy: '© 2026 Selvadentro Tulum · Programa de Referidos',
@@ -219,7 +219,7 @@ const es = {
     errorMissing: 'Por favor completa todos los campos.',
     errorPhone: 'Ingresa un teléfono válido (incluye lada).',
     errorSubmit:
-      'No pudimos procesar tu solicitud. Intenta de nuevo o escríbenos a d.comercial@selvadentrotulum.com.',
+      'No pudimos procesar tu solicitud. Intenta de nuevo o escríbenos a info@selvadentrotulum.com.',
     successTitle: '¡Bienvenido al programa!',
     successBody: 'Este es tu link personalizado. Compártelo y empieza a ganar.',
     yourLink: 'Tu link personalizado',
@@ -262,7 +262,7 @@ const es = {
     tryAnother: 'intenta con otro correo',
     errorEmpty: 'Ingresa tu correo.',
     errorRateLimit:
-      'Demasiados envíos recientes. Por seguridad Supabase limita los correos de acceso. Espera unos minutos antes de intentar de nuevo o escríbenos a d.comercial@selvadentrotulum.com para ayuda inmediata.',
+      'Demasiados envíos recientes. Por seguridad Supabase limita los correos de acceso. Espera unos minutos antes de intentar de nuevo o escríbenos a info@selvadentrotulum.com para ayuda inmediata.',
     errorInvalidEmail: 'Ese correo no parece válido. Revísalo e intenta de nuevo.',
     errorGeneric: 'No pudimos enviar el correo. Intenta de nuevo en un momento.',
   },
@@ -409,7 +409,7 @@ const en = {
     edit: 'Edit',
     contactEmail: 'info@selvadentrotulum.com',
     contactPhone: '+52 999 489 0828',
-    contactSupportEmail: 'd.comercial@selvadentrotulum.com',
+    contactSupportEmail: 'info@selvadentrotulum.com',
     program: 'Referral Program',
     footerCommunity: 'Selvadentro · land of cenotes',
     footerCopy: '© 2026 Selvadentro Tulum · Referral Program',
@@ -599,7 +599,7 @@ const en = {
     errorMissing: 'Please fill out every field.',
     errorPhone: 'Enter a valid phone number (include country code).',
     errorSubmit:
-      'We couldn’t process your request. Please try again or email d.comercial@selvadentrotulum.com.',
+      'We couldn’t process your request. Please try again or email info@selvadentrotulum.com.',
     successTitle: 'Welcome to the program!',
     successBody: 'This is your personalized link. Share it and start earning.',
     yourLink: 'Your personalized link',
@@ -643,7 +643,7 @@ const en = {
     tryAnother: 'try another email',
     errorEmpty: 'Enter your email.',
     errorRateLimit:
-      'Too many recent sends. For safety Supabase rate-limits sign-in emails. Wait a few minutes and try again, or email d.comercial@selvadentrotulum.com for immediate help.',
+      'Too many recent sends. For safety Supabase rate-limits sign-in emails. Wait a few minutes and try again, or email info@selvadentrotulum.com for immediate help.',
     errorInvalidEmail: 'That email doesn’t look valid. Double-check and try again.',
     errorGeneric: 'We couldn’t send the email. Please try again shortly.',
   },
