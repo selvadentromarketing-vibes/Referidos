@@ -2,6 +2,20 @@ import { supabase } from './supabase';
 import { TrackingParams } from './tracking';
 
 /**
+ * Guarantee the phone we send GHL is in E.164 with the country code prefixed.
+ * PhoneInput already does this, but this is a defensive belt for any case where
+ * the value reaches us as a bare local number.
+ */
+const normalizeE164 = (raw: string | undefined, defaultCountryCode = '+52'): string => {
+  if (!raw) return '';
+  const trimmed = raw.replace(/[\s()\-.]/g, '').trim();
+  if (trimmed.startsWith('+')) return trimmed;
+  const digits = trimmed.replace(/\D/g, '');
+  if (!digits) return '';
+  return `${defaultCountryCode}${digits}`;
+};
+
+/**
  * Two-system writes for referidos:
  *
  *   submitReferrerSignup → Supabase (create affiliate + get code)
@@ -131,7 +145,7 @@ export const submitReferrerSignup = async (
       last_name: data.last_name,
       name: `${data.first_name} ${data.last_name}`.trim(),
       email: data.email,
-      phone: data.phone,
+      phone: normalizeE164(data.phone),
       // GHL dropdown values — Spanish words throughout (Inglés / Español / Francés / Otro)
       language: LANGUAGE_FOR_GHL[lang],
       form_type: 'referrer-signup',
@@ -220,7 +234,7 @@ export const submitReferralLead = async (
       last_name: data.last_name,
       name: `${data.first_name} ${data.last_name}`.trim(),
       email: data.email,
-      phone: data.phone,
+      phone: normalizeE164(data.phone),
       // GHL dropdown values — Spanish words throughout (Inglés / Español / Francés / Otro)
       language: LANGUAGE_FOR_GHL[lang],
       form_type: 'referral-lead',
