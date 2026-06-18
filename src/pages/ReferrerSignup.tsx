@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Check, X, LogIn } from 'lucide-react';
 import ReferrerForm from '../components/ReferrerForm';
+import VSL from '../components/VSL';
 import { captureTrackingParams } from '../utils/tracking';
 import { useLang } from '../i18n/useLang';
 
@@ -75,7 +76,9 @@ export default function ReferrerSignup() {
             <em className="block not-italic text-brand-copper font-cardo italic">{t.referrerSignup.heroSubtitle}</em>
           </h1>
 
-          <p className="font-cardo italic text-white/75 text-base sm:text-lg">{t.referrerSignup.heroTagline}</p>
+          <p className="font-cardo italic text-white/75 text-base sm:text-lg mb-10 sm:mb-12">{t.referrerSignup.heroTagline}</p>
+
+          <VSL lang={lang} />
         </div>
       </section>
 
