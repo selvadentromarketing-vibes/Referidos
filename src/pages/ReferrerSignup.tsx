@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Check, X, LogIn } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 import ReferrerForm from '../components/ReferrerForm';
 import VSL from '../components/VSL';
 import { captureTrackingParams } from '../utils/tracking';
@@ -38,13 +38,6 @@ export default function ReferrerSignup() {
               title={`Switch to ${otherLang.toUpperCase()}`}
             >
               {lang.toUpperCase()} · <span className="text-brand-copper underline">{otherLang.toUpperCase()}</span>
-            </a>
-            <a
-              href={`/${lang}/login`}
-              className="hidden sm:inline-flex items-center gap-1.5 text-xs sm:text-sm text-white/80 hover:text-white px-3 py-1.5 rounded-full hover:bg-white/10 transition"
-            >
-              <LogIn className="w-3.5 h-3.5" />
-              {t.common.loginCta}
             </a>
             <button
               onClick={openForm}
