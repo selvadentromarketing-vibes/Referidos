@@ -153,9 +153,7 @@ export default function ReferrerForm() {
           </span>
           <div className="phone-input-shell px-4 py-3 border border-stone-300 rounded-lg bg-white transition focus-within:border-brand-olive focus-within:ring-2 focus-within:ring-brand-olive/30">
             <PhoneInput
-              international
               defaultCountry="MX"
-              countryCallingCodeEditable={false}
               value={phone}
               onChange={setPhone}
               placeholder={t.referrerForm.placeholderPhone}
